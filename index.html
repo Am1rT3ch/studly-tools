@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr"> <!-- משאיר LTR כדי שהפריסה לא תתהפך -->
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Studly Pro — כלים</title>
+  <title>Studly Pro — Tools</title>
   <link rel="icon" href="./assets/logo.png" type="image/png">
   <style>
     :root{
@@ -19,6 +19,8 @@
     .brand span{font-weight:800;letter-spacing:.3px;font-size:20px}
     nav a{color:var(--fg);text-decoration:none;margin-inline:8px}
     nav a:hover{opacity:.85}
+    .lang{display:flex;align-items:center;gap:8px}
+    .lang .btn{appearance:none;border:0;padding:8px 12px;border-radius:12px;font-weight:700;cursor:pointer;background:#1b2238;color:var(--fg);border:1px solid var(--b)}
     h1{margin:8px 0 16px;font-size:26px}
     .tag{color:var(--muted);font-size:14px}
     .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
@@ -40,46 +42,55 @@
   </style>
 </head>
 <body>
+  <!-- מנוע טקסטים (לא משנה פריסה) -->
+  <script src="./i18n.js"></script>
+
   <div class="wrap">
     <header>
       <div class="brand">
         <img src="./assets/logo.png" alt="Studly Pro">
-        <span>Studly Pro</span>
+        <span data-i18n="brand">Studly Pro</span>
       </div>
+
       <nav class="tag">
-        <a href="./">בית</a>
-        <a href="./pomodoro.html">Pomodoro</a>
-        <a href="./tasks.html">Tasks</a>
-        <a href="./flashcards.html">Flashcards</a>
+        <a href="./" data-i18n="nav_home">Home</a>
+        <a href="./pomodoro.html" data-i18n="nav_pomodoro">Pomodoro</a>
+        <a href="./tasks.html" data-i18n="nav_tasks">Tasks</a>
+        <a href="./flashcards.html" data-i18n="nav_flash">Flashcards</a>
       </nav>
+
+      <div class="lang">
+        <button class="btn" onclick="lang.set('he')">עברית</button>
+        <button class="btn" onclick="lang.set('en')">English</button>
+      </div>
     </header>
 
     <main>
-      <h1>ברוך הבא ל־Studly Pro</h1>
-      <p class="tag">כלי לימוד ופרודוקטיביות בחינם.</p>
+      <h1 data-i18n="hero_title">Welcome to Studly Pro</h1>
+      <p class="tag" data-i18n="hero_tag">Free study & productivity tools.</p>
 
       <div class="grid">
         <a class="card" href="./pomodoro.html">
-          <h3>Pomodoro Timer</h3>
-          <p>טיימר עם טבעת התקדמות, הפסקות קצרות/ארוכות, Auto-start ושמירה מקומית.</p>
-          <span class="btn">פתח</span>
+          <h3 data-i18n="card_pomodoro_title">Pomodoro Timer</h3>
+          <p data-i18n="card_pomodoro_desc">Timer with progress ring, short/long breaks, Auto-start and local save.</p>
+          <span class="btn" data-i18n="card_open">Open</span>
         </a>
 
         <a class="card" href="./tasks.html">
-          <h3>Task List (בקרוב)</h3>
-          <p>רשימת משימות פשוטה עם שמירה בדפדפן.</p>
-          <span class="btn">בקרוב</span>
+          <h3 data-i18n="card_tasks_title">Task List (soon)</h3>
+          <p data-i18n="card_tasks_desc">Simple task list with browser storage.</p>
+          <span class="btn" data-i18n="card_open">Open</span>
         </a>
 
         <a class="card" href="./flashcards.html">
-          <h3>Flashcards (בקרוב)</h3>
-          <p>כרטיסיות לימוד חכמות ללמידה מהירה.</p>
-          <span class="btn">בקרוב</span>
+          <h3 data-i18n="card_flash_title">Flashcards (soon)</h3>
+          <p data-i18n="card_flash_desc">Smart study flashcards.</p>
+          <span class="btn" data-i18n="card_open">Open</span>
         </a>
       </div>
     </main>
 
-    <footer>© Studly Pro — בנוי על GitHub Pages</footer>
+    <footer data-i18n="footer">Built on GitHub Pages — Studly Pro ©</footer>
   </div>
 </body>
 </html>
