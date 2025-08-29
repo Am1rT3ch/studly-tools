@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pomodoro Pro (Web)</title>
-  <link rel="icon" href="./assets/logo.png?v=2" type="image/png">
-  <link rel="apple-touch-icon" href="./assets/logo.png?v=2">
-  <meta name="theme-color" content="#0b1020"/>
+  <link rel="icon" href="./assets/logo.png" type="image/png">
   <style>
     html, body { height: 100%; margin: 0; background: #0b1020; }
     body { display: grid; place-items: center; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
@@ -25,28 +23,29 @@
   </style>
 </head>
 <body>
-  <!-- i18n engine -->
-  <script src="./i18n.js"></script>
-
   <div class="demo-shell">
     <div class="demo-grid">
       <div class="card">
-        <h2 data-i18n="card_pomodoro_title">Pomodoro Timer</h2>
+        <h2>Pomodoro Pro — Component</h2>
         <pomodoro-pro id="pom1" autostart="false" controls="internal"></pomodoro-pro>
-        <div class="muted" data-i18n="p_tip" data-i18n-html="1" style="margin-top:12px">
-          Tip: Set <code>controls="external"</code> ...
-        </div>
+        <div class="muted" style="margin-top:12px">Tip: Set <code>controls="external"</code> to hide built-in controls and drive it with your own buttons.</div>
       </div>
       <div class="card">
         <h2>External Controls (example)</h2>
         <div class="row" style="margin-bottom:12px">
-          <button class="btn primary" onclick="pomodoro('pom1').start()" data-i18n="p_btn_start">Start</button>
-          <button class="btn" onclick="pomodoro('pom1').pause()" data-i18n="p_btn_pause">Pause</button>
-          <button class="btn" onclick="pomodoro('pom1').reset()" data-i18n="p_btn_reset">Reset</button>
-          <button class="btn" onclick="pomodoro('pom1').setMode('work')" data-i18n="p_tabs_work">Work</button>
-          <button class="btn" onclick="pomodoro('pom1').setMode('short')" data-i18n="p_tabs_short">Short</button>
-          <button class="btn" onclick="pomodoro('pom1').setMode('long')" data-i18n="p_tabs_long">Long</button>
+          <button class="btn primary" onclick="pomodoro('pom1').start()">Start</button>
+          <button class="btn" onclick="pomodoro('pom1').pause()">Pause</button>
+          <button class="btn" onclick="pomodoro('pom1').reset()">Reset</button>
+          <button class="btn" onclick="pomodoro('pom1').setMode('work')">Work</button>
+          <button class="btn" onclick="pomodoro('pom1').setMode('short')">Short</button>
+          <button class="btn" onclick="pomodoro('pom1').setMode('long')">Long</button>
         </div>
+        <div class="row">
+          <button class="btn" onclick="pomodoro('pom1').setDurations({work:25, short:5, long:15})">Reset Durations</button>
+          <button class="btn" onclick="pomodoro('pom1').setDurations({work:50, short:10, long:30})">50/10/30</button>
+          <button class="btn" onclick="pomodoro('pom1').toggleAutoStart()">Toggle Auto-Start</button>
+        </div>
+        <p class="muted">You can also control it via <code>window.postMessage({action:'start'})</code> (useful for Wix HTML iframe).</p>
       </div>
     </div>
   </div>
@@ -54,7 +53,6 @@
   <script>
   (function(){
     const STORAGE_KEY = 'pomodoro-pro:settings:v1';
-    const t = (k)=> window.i18n?.t(k) ?? k;
 
     class PomodoroPro extends HTMLElement {
       static get observedAttributes(){ return ['autostart','controls']; }
@@ -72,13 +70,6 @@
         this._durations = saved?.durations || { work: 25*60, short: 5*60, long: 15*60 };
         this._autoStart = saved?.autoStart ?? (this.getAttribute('autostart') === 'true' || this.getAttribute('autostart') === '');
 
-        this._render();
-
-        // עדכון טקסטים כשמשנים שפה
-        window.addEventListener("i18n:change", ()=> this._renderLabelsOnly());
-      }
-
-      _render(){
         this._shadow.innerHTML = `
           <style>
             :host{ --bg:#0d1326; --panel:rgba(255,255,255,.07); --text:#e8ecf7; --sub:#9aa6c1; --primary:#6366f1; --accent:#22d3ee; --danger:#ef4444; display:block; }
@@ -105,9 +96,9 @@
           </style>
           <div class="wrap">
             <div class="tabs" part="tabs">
-              <div class="tab" data-mode="work">${t('p_tabs_work')}</div>
-              <div class="tab" data-mode="short">${t('p_tabs_short')}</div>
-              <div class="tab" data-mode="long">${t('p_tabs_long')}</div>
+              <div class="tab" data-mode="work">Work</div>
+              <div class="tab" data-mode="short">Short</div>
+              <div class="tab" data-mode="long">Long</div>
             </div>
             <div class="ring" part="ring">
               <svg viewBox="0 0 120 120" aria-hidden="true">
@@ -122,20 +113,20 @@
               </svg>
               <div class="label">
                 <div class="time" id="time">25:00</div>
-                <div class="mode" id="mode">${t('p_label_work')}</div>
+                <div class="mode" id="mode">Work</div>
               </div>
             </div>
             <div class="row" id="controls">
-              <button id="start">${t('p_btn_start')}</button>
-              <button id="pause" variant="ghost">${t('p_btn_pause')}</button>
-              <button id="reset" variant="ghost">${t('p_btn_reset')}</button>
+              <button id="start">Start</button>
+              <button id="pause" variant="ghost">Pause</button>
+              <button id="reset" variant="ghost">Reset</button>
             </div>
             <div class="settings" part="settings">
-              <div class="num"><label>${t('p_set_work')}</label><input id="work" type="number" min="1" value="25" /></div>
-              <div class="num"><label>${t('p_set_short')}</label><input id="short" type="number" min="1" value="5" /></div>
-              <div class="num"><label>${t('p_set_long')}</label><input id="long" type="number" min="1" value="15" /></div>
+              <div class="num"><label>Work (min)</label><input id="work" type="number" min="1" value="${(this._durations.work/60)|0}" /></div>
+              <div class="num"><label>Short (min)</label><input id="short" type="number" min="1" value="${(this._durations.short/60)|0}" /></div>
+              <div class="num"><label>Long (min)</label><input id="long" type="number" min="1" value="${(this._durations.long/60)|0}" /></div>
             </div>
-            <div class="toggle"><input id="auto" type="checkbox"> <label for="auto">${t('p_auto')}</label></div>
+            <div class="toggle"><input id="auto" type="checkbox"> <label for="auto">Auto-start next session</label></div>
           </div>
         `;
 
@@ -154,11 +145,23 @@
         this._dom.reset.addEventListener('click', () => this.reset());
         this._dom.tabs.forEach(t => t.addEventListener('click', () => this.setMode(t.dataset.mode)));
         [this._dom.work, this._dom.short, this._dom.long].forEach(inp => inp.addEventListener('change', () => {
-          const mins = { work: +this._dom.work.value||25, short: +this._dom.short.value||5, long: +this._dom.long.value||15 };
-          this.setDurations(mins);
+          const mins = {
+            work: parseInt(this._dom.work.value || '25', 10),
+            short: parseInt(this._dom.short.value || '5', 10),
+            long: parseInt(this._dom.long.value || '15', 10)
+          };
+          this.setDurations({work: mins.work, short: mins.short, long: mins.long});
         }));
         this._dom.auto.checked = !!this._autoStart;
-        this._dom.auto.addEventListener('change', () => this.setAutoStart(this._dom.auto.checked));
+        this._dom.auto.addEventListener('change', () => { this.setAutoStart(this._dom.auto.checked); });
+
+        window.addEventListener('message', (evt) => {
+          const d = evt?.data || {}; if(!d || !d.action) return;
+          if (d.action === 'start') this.start();
+          if (d.action === 'pause') this.pause();
+          if (d.action === 'reset') this.reset();
+          if (d.action === 'mode' && d.value) this.setMode(String(d.value));
+        });
 
         this._applyModeUI();
         this._updateTimeLabel(this._durations[this._mode]*1000);
@@ -166,25 +169,8 @@
         this._updateControlsVisibility();
       }
 
-      _renderLabelsOnly(){
-        // עדכון טקסטים בתוך ה-Shadow DOM בלי להרוס מצב הטיימר
-        const t = (k)=> window.i18n?.t(k) ?? k;
-        const tabMap = { work:'p_tabs_work', short:'p_tabs_short', long:'p_tabs_long' };
-        [...this._shadow.querySelectorAll('.tab')].forEach(tab=>{
-          tab.textContent = t(tabMap[tab.dataset.mode]);
-        });
-        this._shadow.getElementById('start').textContent = t('p_btn_start');
-        this._shadow.getElementById('pause').textContent = t('p_btn_pause');
-        this._shadow.getElementById('reset').textContent = t('p_btn_reset');
-        this._shadow.querySelectorAll('.num label')[0].textContent = t('p_set_work');
-        this._shadow.querySelectorAll('.num label')[1].textContent = t('p_set_short');
-        this._shadow.querySelectorAll('.num label')[2].textContent = t('p_set_long');
-        this._shadow.querySelector('.toggle label').textContent = t('p_auto');
-        this._dom.mode.textContent = (this._mode==='work') ? t('p_label_work') : (this._mode==='short' ? t('p_label_short') : t('p_label_long'));
-      }
-
-      attributeChangedCallback(name, _o, n){
-        if(name==='autostart'){ this._autoStart = n === '' || n === 'true'; this._dom.auto.checked = !!this._autoStart; this._saveSettings(); }
+      attributeChangedCallback(name, oldVal, newVal){
+        if(name==='autostart'){ this._autoStart = newVal === '' || newVal === 'true'; this._dom.auto.checked = !!this._autoStart; this._saveSettings(); }
         if(name==='controls'){ this._updateControlsVisibility(); }
       }
 
@@ -199,7 +185,11 @@
       setMode(mode){ mode = String(mode||'work').toLowerCase(); if(!['work','short','long'].includes(mode)) return;
         const wasRunning = this._running; this.pause(); this._mode = mode; this._elapsedBeforePause = 0; this._applyModeUI();
         this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); if(wasRunning) this.start(); this._emit('mode',{mode}); }
-      setDurations({work, short, long}){ const mins = { work: Math.max(1, Math.floor(work ?? (this._durations.work/60))), short: Math.max(1, Math.floor(short ?? (this._durations.short/60))), long: Math.max(1, Math.floor(long ?? (this._durations.long/60))) };
+      setDurations({work, short, long}){ const mins = {
+        work: Math.max(1, Math.floor(work ?? (this._durations.work/60))),
+        short: Math.max(1, Math.floor(short ?? (this._durations.short/60))),
+        long: Math.max(1, Math.floor(long ?? (this._durations.long/60)))
+      };
         this._durations = { work: mins.work*60, short: mins.short*60, long: mins.long*60 }; this._saveSettings(); this.reset();
         this._dom.work.value = mins.work; this._dom.short.value = mins.short; this._dom.long.value = mins.long; }
       setAutoStart(v){ this._autoStart = !!v; this._dom.auto.checked = !!v; this._saveSettings(); }
@@ -229,15 +219,13 @@
           } else {
             this.setMode('work');
           }
-          this._renderLabelsOnly();
           if(this._autoStart) this.start();
         }
       }
 
       _applyModeUI(){
-        const t = (k)=> window.i18n?.t(k) ?? k;
-        this._dom?.mode && (this._dom.mode.textContent =
-          (this._mode==='work') ? t('p_label_work') : (this._mode==='short' ? t('p_label_short') : t('p_label_long')));
+        const label = this._mode === 'work' ? 'Work' : (this._mode === 'short' ? 'Short Break' : 'Long Break');
+        this._dom.mode.textContent = label;
         const root = this._shadow.host;
         if(this._mode==='work'){ root.style.setProperty('--primary','#6366f1'); root.style.setProperty('--accent','#22d3ee'); }
         if(this._mode==='short'){ root.style.setProperty('--primary','#10b981'); root.style.setProperty('--accent','#34d399'); }
@@ -276,19 +264,16 @@
     window.pomodoro = function(id){
       const el = id ? document.getElementById(id) : document.querySelector('pomodoro-pro');
       if(!el) throw new Error('pomodoro-pro element not found');
-      return { start: ()=> el.start(), pause: ()=> el.pause(), reset: ()=> el.reset(),
-        setMode: (m)=> el.setMode(m), setDurations: (cfg)=> el.setDurations(cfg),
-        setAutoStart: (v)=> el.setAutoStart(v), toggleAutoStart: ()=> el.toggleAutoStart() };
+      return {
+        start: ()=> el.start(),
+        pause: ()=> el.pause(),
+        reset: ()=> el.reset(),
+        setMode: (m)=> el.setMode(m),
+        setDurations: (cfg)=> el.setDurations(cfg),
+        setAutoStart: (v)=> el.setAutoStart(v),
+        toggleAutoStart: ()=> el.toggleAutoStart()
+      };
     }
-
-    // ליישר טקסטים לפי השפה כבר בעת טעינה
-    window.addEventListener("DOMContentLoaded", ()=> {
-      document.querySelectorAll("[data-i18n]").forEach(el=>{
-        const key = el.getAttribute("data-i18n");
-        const val = i18n.t(key);
-        if (el.hasAttribute("data-i18n-html")) el.innerHTML = val; else el.textContent = val;
-      });
-    });
   })();
   </script>
 </body>
