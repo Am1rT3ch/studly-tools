@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Studly Pro — מחשבון מבחנים</title>
+  <link rel="icon" href="./assets/logo.png" type="image/png">
+  <style>
+    :root{ --bg:#0b1020; --fg:#e6e8ee; --muted:#9aa6c1; --card:rgba(255,255,255,.06); --b:rgba(255,255,255,.1); --accent:#6366f1; --accent2:#22d3ee; }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial }
+    .wrap{ max-width:1100px; margin:0 auto; padding:24px }
+
+    /* Header כמו בעמודים האחרים: לוגו מימין, ניווט באמצע, שפה משמאל */
+    header{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; margin-bottom:24px }
+    .brand{ justify-self:start; display:flex; align-items:center; gap:10px }
+    .brand img{ width:40px; height:40px; border-radius:8px }
+    .brand span{ font-weight:800; letter-spacing:.3px; font-size:20px }
+    nav{ justify-self:center }
+    nav a{ color:var(--fg); text-decoration:none; margin-inline:8px }
+    nav a:hover{ opacity:.85 }
+    .lang{ justify-self:end; display:flex; gap:8px }
+    .lang .btn{ appearance:none; border:0; padding:8px 12px; border-radius:12px; font-weight:700; cursor:pointer; background:#1b2238; color:var(--fg); border:1px solid var(--b) }
+    .lang .btn.active{ outline:2px solid var(--accent) }
+
+    /* Cards & form */
+    .grid{ display:grid; gap:24px; grid-template-columns:1fr; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .card{ background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+           border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);
+           padding: 20px; border: 1px solid rgba(255,255,255,.08); }
+    .card h2{ margin:0 0 12px; font-size:18px; font-weight:600; letter-spacing:.3px }
+    .row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+    .muted{ opacity:.75; font-size:12px }
+    .field{ display:grid; gap:6px; flex:1 1 160px; min-width:160px }
+    .field label{ font-size:12px; color:var(--muted) }
+    .field input, .field select{
+      background:#0f162d; color:var(--fg); border:1px solid var(--b); border-radius:12px; padding:10px 12px; font-weight:700
+    }
+    .btn{ appearance:none; border:0; padding:10px 14px; border-radius:12px; font-weight:700; cursor:pointer; background:#2a2f45; color:#e6e8ee; transition:transform .08s, box-shadow .2s; box-shadow:0 6px 16px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06) }
+    .btn.primary{ background: linear-gradient(135deg, var(--accent), var(--accent2)); color:#081018 }
+    .btn:hover{ transform:translateY(-1px) }
+    .btn:active{ transform:translateY(0) }
+
+    .result{
+      display:grid; gap:10px; place-items:center; text-align:center; padding:16px; border-radius:16px;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border:1px solid var(--b)
+    }
+    .score{ font-size:44px; font-weight:900; letter-spacing:.5px }
+    .details{ color:var(--muted); font-size:13px }
+    footer{ margin-top:28px; color:var(--muted); font-size:13px; text-align:center }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <img src="./assets/logo.png" alt="Studly Pro"><span id="t-brand">Studly Pro</span>
+      </div>
+      <nav>
+        <a href="./" id="t-nav-home">בית</a>
+        <a href="./pomodoro.html" id="t-nav-pomodoro">Pomodoro</a>
+        <a href="./tasks.html" id="t-nav-tasks">Tasks</a>
+        <a href="./flashcards.html" id="t-nav-flash">Flashcards</a>
+      </nav>
+      <div class="lang">
+        <button class="btn" id="btn-he">עברית</button>
+        <button class="btn" id="btn-en">English</button>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <div class="grid">
+      <div class="card">
+        <h2 id="h2-title">מחשבונים — ציון מבחן</h2>
+        <p class="muted" id="hint">בחרו מצב חישוב: לפי תשובות נכונות או לפי טעויות.</p>
+
+        <div class="row" style="margin-top:8px">
+          <div class="field">
+            <label id="lbl-mode">מצב חישוב</label>
+            <select id="mode">
+              <option value="correct">לפי תשובות נכונות</option>
+              <option value="mistakes">לפי טעויות</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label id="lbl-total">מספר שאלות</label>
+            <input id="total" type="number" min="1" inputmode="numeric" placeholder="למשל 40">
+          </div>
+
+          <div class="field" id="field-correct">
+            <label id="lbl-correct">תשובות נכונות</label>
+            <input id="correct" type="number" min="0" inputmode="numeric" placeholder="למשל 34">
+          </div>
+
+          <div class="field" id="field-mistakes" style="display:none">
+            <label id="lbl-mistakes">טעויות</label>
+            <input id="mistakes" type="number" min="0" inputmode="numeric" placeholder="למשל 6">
+          </div>
+
+          <div class="field">
+            <label id="lbl-scale">שקלול (% בסיס) </label>
+            <input id="scale" type="number" min="1" max="100" value="100">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary" id="btn-calc">חשב</button>
+          <button class="btn" id="btn-clear">נקה</button>
+        </div>
+
+        <div class="result" style="margin-top:16px">
+          <div class="score" id="score">—</div>
+          <div class="details" id="details">הזן נתונים לחישוב.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 id="h2-explain">איך זה עובד?</h2>
+        <p class="muted" id="explain">
+          במצב “תשובות נכונות” – הציון = (נכונות / סה״כ) × 100 × (שקלול/100).<br>
+          במצב “טעויות” – הציון = ((סה״כ − טעויות) / סה״כ) × 100 × (שקלול/100).
+        </p>
+
+        <div class="row" style="margin-top:8px">
+          <button class="btn" id="btn-fill-demo">מלא דוגמה</button>
+        </div>
+      </div>
+    </div>
+
+    <footer id="t-footer">© Studly Pro — בנוי על GitHub Pages</footer>
+  </div>
+
+  <script>
+    /* ====== מילון שפות (ללא שינוי פריסה) ====== */
+    const DICT = {
+      he: {
+        brand:"Studly Pro",
+        nav_home:"בית", nav_pomodoro:"Pomodoro", nav_tasks:"Tasks", nav_flash:"Flashcards",
+        footer:"© Studly Pro — בנוי על GitHub Pages",
+        title:"מחשבונים — ציון מבחן",
+        hint:"בחרו מצב חישוב: לפי תשובות נכונות או לפי טעויות.",
+        mode:"מצב חישוב", mode_correct:"לפי תשובות נכונות", mode_mistakes:"לפי טעויות",
+        total:"מספר שאלות", correct:"תשובות נכונות", mistakes:"טעויות",
+        scale:"שקלול (% בסיס)", calc:"חשב", clear:"נקה",
+        score_empty:"הזן נתונים לחישוב.",
+        explain_title:"איך זה עובד?",
+        explain:"במצב “תשובות נכונות” – הציון = (נכונות / סה״כ) × 100 × (שקלול/100).<br>במצב “טעויות” – הציון = ((סה״כ − טעויות) / סה״כ) × 100 × (שקלול/100).",
+        demo:"מלא דוגמה",
+        output:(s,c,m,t)=>`ציון: ${s}% · נכונות: ${c} · טעויות: ${m} · סה״כ: ${t}`
+      },
+      en: {
+        brand:"Studly Pro",
+        nav_home:"Home", nav_pomodoro:"Pomodoro", nav_tasks:"Tasks", nav_flash:"Flashcards",
+        footer:"Built on GitHub Pages — Studly Pro ©",
+        title:"Exam Calculator",
+        hint:"Choose calculation mode: by correct answers or by mistakes.",
+        mode:"Mode", mode_correct:"By correct answers", mode_mistakes:"By mistakes",
+        total:"Total questions", correct:"Correct answers", mistakes:"Mistakes",
+        scale:"Scale (% base)", calc:"Calculate", clear:"Clear",
+        score_empty:"Enter values to calculate.",
+        explain_title:"How it works",
+        explain:"Correct mode: score = (correct / total) × 100 × (scale/100).<br>Mistakes mode: score = ((total − mistakes) / total) × 100 × (scale/100).",
+        demo:"Fill demo",
+        output:(s,c,m,t)=>`Score: ${s}% · Correct: ${c} · Mistakes: ${m} · Total: ${t}`
+      }
+    };
+    const LANG_KEY = 'studlypro:lang';
+
+    /* ====== אלמנטים ====== */
+    const elsHeader = {
+      brand: document.getElementById('t-brand'),
+      nav_home: document.getElementById('t-nav-home'),
+      nav_pomodoro: document.getElementById('t-nav-pomodoro'),
+      nav_tasks: document.getElementById('t-nav-tasks'),
+      nav_flash: document.getElementById('t-nav-flash'),
+      footer: document.getElementById('t-footer'),
+      btnHe: document.getElementById('btn-he'),
+      btnEn: document.getElementById('btn-en'),
+    };
+
+    const modeSel = document.getElementById('mode');
+    const totalInp = document.getElementById('total');
+    const correctField = document.getElementById('field-correct');
+    const mistakesField = document.getElementById('field-mistakes');
+    const correctInp = document.getElementById('correct');
+    const mistakesInp = document.getElementById('mistakes');
+    const scaleInp = document.getElementById('scale');
+    const btnCalc = document.getElementById('btn-calc');
+    const btnClear = document.getElementById('btn-clear');
+    const btnDemo  = document.getElementById('btn-fill-demo');
+    const scoreOut = document.getElementById('score');
+    const detailsOut = document.getElementById('details');
+
+    const h2Title = document.getElementById('h2-title');
+    const hint = document.getElementById('hint');
+    const lblMode = document.getElementById('lbl-mode');
+    const lblTotal = document.getElementById('lbl-total');
+    const lblCorrect = document.getElementById('lbl-correct');
+    const lblMistakes = document.getElementById('lbl-mistakes');
+    const lblScale = document.getElementById('lbl-scale');
+
+    const h2Explain = document.getElementById('h2-explain');
+    const explain = document.getElementById('explain');
+
+    function applyLang(lang){
+      const d = DICT[lang] || DICT.he;
+
+      // header
+      elsHeader.brand.textContent = d.brand;
+      elsHeader.nav_home.textContent = d.nav_home;
+      elsHeader.nav_pomodoro.textContent = d.nav_pomodoro;
+      elsHeader.nav_tasks.textContent = d.nav_tasks;
+      elsHeader.nav_flash.textContent = d.nav_flash;
+      elsHeader.footer.textContent = d.footer;
+      elsHeader.btnHe.classList.toggle('active', lang==='he');
+      elsHeader.btnEn.classList.toggle('active', lang==='en');
+
+      // form labels
+      h2Title.textContent = d.title;
+      hint.textContent = d.hint;
+      lblMode.textContent = d.mode;
+      modeSel.options[0].textContent = d.mode_correct;
+      modeSel.options[1].textContent = d.mode_mistakes;
+      lblTotal.textContent = d.total;
+      lblCorrect.textContent = d.correct;
+      lblMistakes.textContent = d.mistakes;
+      lblScale.textContent = d.scale;
+      btnCalc.textContent = d.calc;
+      btnClear.textContent = d.clear;
+      h2Explain.textContent = d.explain_title;
+      explain.innerHTML = d.explain;
+      detailsOut.textContent = d.score_empty;
+
+      localStorage.setItem(LANG_KEY, lang);
+    }
+
+    elsHeader.btnHe.addEventListener('click', ()=> applyLang('he'));
+    elsHeader.btnEn.addEventListener('click', ()=> applyLang('en'));
+    applyLang(localStorage.getItem(LANG_KEY) || 'he');
+
+    // הצגת/הסתרת שדות לפי מצב
+    function updateModeUI(){
+      const m = modeSel.value;
+      correctField.style.display = (m==='correct') ? '' : 'none';
+      mistakesField.style.display = (m==='mistakes') ? '' : 'none';
+      scoreOut.textContent = '—';
+      detailsOut.textContent = (DICT[localStorage.getItem(LANG_KEY)||'he'].score_empty);
+    }
+    modeSel.addEventListener('change', updateModeUI);
+    updateModeUI();
+
+    // חישוב
+    function calc(){
+      const lang = localStorage.getItem(LANG_KEY) || 'he';
+      const d = DICT[lang] || DICT.he;
+
+      const total = Math.max(0, parseInt(totalInp.value || '0', 10));
+      if (!total){ scoreOut.textContent = '—'; detailsOut.textContent = d.score_empty; return; }
+
+      const scale = Math.min(100, Math.max(1, parseInt(scaleInp.value || '100', 10)));
+      let correct = 0, mistakes = 0;
+
+      if (modeSel.value === 'correct'){
+        correct = Math.min(total, Math.max(0, parseInt(correctInp.value || '0', 10)));
+        mistakes = Math.max(0, total - correct);
+      } else {
+        mistakes = Math.min(total, Math.max(0, parseInt(mistakesInp.value || '0', 10)));
+        correct = Math.max(0, total - mistakes);
+      }
+
+      const raw = (correct / total) * 100;
+      const final = Math.round((raw * (scale/100)) * 100) / 100; // שתי ספרות אחרי הנקודה
+      scoreOut.textContent = `${final}%`;
+      detailsOut.textContent = d.output(final, correct, mistakes, total);
+    }
+    btnCalc.addEventListener('click', calc);
+
+    // ניקוי
+    btnClear.addEventListener('click', ()=>{
+      totalInp.value = '';
+      correctInp.value = '';
+      mistakesInp.value = '';
+      scaleInp.value = 100;
+      scoreOut.textContent = '—';
+      detailsOut.textContent = (DICT[localStorage.getItem(LANG_KEY)||'he'].score_empty);
+    });
+
+    // דוגמה
+    btnDemo.addEventListener('click', ()=>{
+      totalInp.value = 40;
+      if (modeSel.value === 'correct'){ correctInp.value = 34; mistakesInp.value = ''; }
+      else { mistakesInp.value = 6; correctInp.value = ''; }
+      scaleInp.value = 100;
+      calc();
+    });
+  </script>
+</body>
+</html>
