@@ -53,6 +53,7 @@
         <a href="./" id="t-nav-home">בית</a>
         <a href="./pomodoro.html" id="t-nav-pomodoro">Pomodoro</a>
         <a href="./exam.html" id="t-nav-exam">Exam</a>
+        <a href="./degree.html" id="t-nav-degree">Degree</a>
         <a href="./tasks.html" id="t-nav-tasks">Tasks</a>
         <a href="./flashcards.html" id="t-nav-flash">Flashcards</a>
       </nav>
@@ -69,24 +70,35 @@
       <p class="tag" id="t-hero-tag">כלי לימוד ופרודוקטיביות בחינם.</p>
 
       <div class="grid">
+        <!-- Pomodoro -->
         <a class="card" href="./pomodoro.html">
           <h3 id="t-card-pomo-title">שעון פומודורו</h3>
           <p id="t-card-pomo-desc">טיימר עם טבעת התקדמות, הפסקות קצרות/ארוכות, Auto-start ושמירה מקומית.</p>
           <span class="btn" id="t-card-open-1">פתח</span>
         </a>
 
+        <!-- Exam calculator -->
         <a class="card" href="./exam.html">
           <h3 id="t-card-exam-title">מחשבון מבחנים</h3>
           <p id="t-card-exam-desc">חשב ציון לפי תשובות נכונות או לפי טעויות.</p>
           <span class="btn" id="t-card-open-2">פתח</span>
         </a>
 
+        <!-- Degree calculator -->
+        <a class="card" href="./degree.html">
+          <h3 id="t-card-degree-title">מחשבון תואר</h3>
+          <p id="t-card-degree-desc">ממוצע משוקלל לפי נקודות זכות.</p>
+          <span class="btn" id="t-card-open-5">פתח</span>
+        </a>
+
+        <!-- Tasks (placeholder) -->
         <a class="card" href="./tasks.html">
           <h3 id="t-card-tasks-title">Task List (בקרוב)</h3>
           <p id="t-card-tasks-desc">רשימת משימות פשוטה עם שמירה בדפדפן.</p>
           <span class="btn" id="t-card-open-3">פתח</span>
         </a>
 
+        <!-- Flashcards (placeholder) -->
         <a class="card" href="./flashcards.html">
           <h3 id="t-card-flash-title">Flashcards (בקרוב)</h3>
           <p id="t-card-flash-desc">כרטיסיות לימוד חכמות ללמידה מהירה.</p>
@@ -103,12 +115,14 @@
     const dict = {
       he: {
         brand:"Studly Pro",
-        nav_home:"בית", nav_pomodoro:"Pomodoro", nav_exam:"Exam", nav_tasks:"Tasks", nav_flash:"Flashcards",
+        nav_home:"בית", nav_pomodoro:"Pomodoro", nav_exam:"Exam", nav_degree:"Degree", nav_tasks:"Tasks", nav_flash:"Flashcards",
         hero_title:"ברוך הבא ל־Studly Pro", hero_tag:"כלי לימוד ופרודוקטיביות בחינם.",
         card_pomo_title:"שעון פומודורו",
         card_pomo_desc:"טיימר עם טבעת התקדמות, הפסקות קצרות/ארוכות, Auto-start ושמירה מקומית.",
         card_exam_title:"מחשבון מבחנים",
         card_exam_desc:"חשב ציון לפי תשובות נכונות או לפי טעויות.",
+        card_degree_title:"מחשבון תואר",
+        card_degree_desc:"ממוצע משוקלל לפי נקודות זכות.",
         card_tasks_title:"Task List (בקרוב)", card_tasks_desc:"רשימת משימות פשוטה עם שמירה בדפדפן.",
         card_flash_title:"Flashcards (בקרוב)", card_flash_desc:"כרטיסיות לימוד חכמות ללמידה מהירה.",
         open:"פתח",
@@ -116,12 +130,14 @@
       },
       en: {
         brand:"Studly Pro",
-        nav_home:"Home", nav_pomodoro:"Pomodoro", nav_exam:"Exam", nav_tasks:"Tasks", nav_flash:"Flashcards",
+        nav_home:"Home", nav_pomodoro:"Pomodoro", nav_exam:"Exam", nav_degree:"Degree", nav_tasks:"Tasks", nav_flash:"Flashcards",
         hero_title:"Welcome to Studly Pro", hero_tag:"Free study & productivity tools.",
         card_pomo_title:"Pomodoro Timer",
         card_pomo_desc:"Timer with progress ring, short/long breaks, Auto-start and local save.",
         card_exam_title:"Exam Calculator",
         card_exam_desc:"Compute score by correct answers or by mistakes.",
+        card_degree_title:"Degree Calculator",
+        card_degree_desc:"Weighted average by credits.",
         card_tasks_title:"Task List (soon)", card_tasks_desc:"Simple task list with browser storage.",
         card_flash_title:"Flashcards (soon)", card_flash_desc:"Smart study flashcards.",
         open:"Open",
@@ -135,6 +151,7 @@
       nav_home: document.getElementById('t-nav-home'),
       nav_pomodoro: document.getElementById('t-nav-pomodoro'),
       nav_exam: document.getElementById('t-nav-exam'),
+      nav_degree: document.getElementById('t-nav-degree'),
       nav_tasks: document.getElementById('t-nav-tasks'),
       nav_flash: document.getElementById('t-nav-flash'),
       hero_title: document.getElementById('t-hero-title'),
@@ -143,12 +160,15 @@
       card_pomo_desc: document.getElementById('t-card-pomo-desc'),
       card_exam_title: document.getElementById('t-card-exam-title'),
       card_exam_desc: document.getElementById('t-card-exam-desc'),
+      card_degree_title: document.getElementById('t-card-degree-title'),
+      card_degree_desc: document.getElementById('t-card-degree-desc'),
       card_tasks_title: document.getElementById('t-card-tasks-title'),
       card_tasks_desc: document.getElementById('t-card-tasks-desc'),
       card_flash_title: document.getElementById('t-card-flash-title'),
       card_flash_desc: document.getElementById('t-card-flash-desc'),
       open1: document.getElementById('t-card-open-1'),
       open2: document.getElementById('t-card-open-2'),
+      open5: document.getElementById('t-card-open-5'),
       open3: document.getElementById('t-card-open-3'),
       open4: document.getElementById('t-card-open-4'),
       footer: document.getElementById('t-footer'),
@@ -162,22 +182,29 @@
       els.nav_home.textContent = d.nav_home;
       els.nav_pomodoro.textContent = d.nav_pomodoro;
       els.nav_exam.textContent = d.nav_exam;
+      els.nav_degree.textContent = d.nav_degree;
       els.nav_tasks.textContent = d.nav_tasks;
       els.nav_flash.textContent = d.nav_flash;
       els.hero_title.textContent = d.hero_title;
       els.hero_tag.textContent = d.hero_tag;
+
       els.card_pomo_title.textContent = d.card_pomo_title;
       els.card_pomo_desc.textContent = d.card_pomo_desc;
       els.card_exam_title.textContent = d.card_exam_title;
       els.card_exam_desc.textContent = d.card_exam_desc;
+      els.card_degree_title.textContent = d.card_degree_title;
+      els.card_degree_desc.textContent = d.card_degree_desc;
       els.card_tasks_title.textContent = d.card_tasks_title;
       els.card_tasks_desc.textContent = d.card_tasks_desc;
       els.card_flash_title.textContent = d.card_flash_title;
       els.card_flash_desc.textContent = d.card_flash_desc;
+
       els.open1.textContent = d.open;
       els.open2.textContent = d.open;
+      els.open5.textContent = d.open;
       els.open3.textContent = d.open;
       els.open4.textContent = d.open;
+
       els.footer.textContent = d.footer;
 
       els.btnHe.classList.toggle('active', lang==='he');
