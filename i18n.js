@@ -1,5 +1,5 @@
-<script>
-window.i18n = (function(){
+// i18n.js
+window.i18n = (function () {
   const LS_KEY = "studlypro:lang";
   const dict = {
     en: {
@@ -13,7 +13,6 @@ window.i18n = (function(){
       card_flash_title:"Flashcards (soon)", card_flash_desc:"Smart study flashcards.",
       footer:"Built on GitHub Pages — Studly Pro ©",
 
-      // Pomodoro component
       p_tabs_work:"Work", p_tabs_short:"Short", p_tabs_long:"Long",
       p_label_work:"WORK", p_label_short:"Short Break", p_label_long:"Long Break",
       p_btn_start:"Start", p_btn_pause:"Pause", p_btn_reset:"Reset",
@@ -32,49 +31,48 @@ window.i18n = (function(){
       card_flash_title:"Flashcards (בקרוב)", card_flash_desc:"כרטיסיות לימוד חכמות ללמידה מהירה.",
       footer:"בנוי על GitHub Pages — Studly Pro ©",
 
-      // Pomodoro component
       p_tabs_work:"עבודה", p_tabs_short:"קצרה", p_tabs_long:"ארוכה",
       p_label_work:"עבודה", p_label_short:"הפסקה קצרה", p_label_long:"הפסקה ארוכה",
       p_btn_start:"התחל", p_btn_pause:"השהה", p_btn_reset:"איפוס",
       p_set_work:"עבודה (דקות)", p_set_short:"קצרה (דקות)", p_set_long:"ארוכה (דקות)",
       p_auto:"הפעלה אוטומטית לסשן הבא",
-      p_tip:`טיפ: ניתן להסתיר כפתורים פנימיים בעזרת <code>controls="external"</code> ולהפעיל עם כפתורים חיצוניים.`
+      p_tip:`טיפ: אפשר להסתיר כפתורים פנימיים עם <code>controls="external"</code> ולהפעיל בלחצנים חיצוניים.`
     }
   };
 
   function getDefaultLang(){
     const saved = localStorage.getItem(LS_KEY);
     if (saved) return saved;
-    const n = (navigator.language||"en").toLowerCase();
+    const n = (navigator.language || "en").toLowerCase();
     return n.startsWith("he") ? "he" : "en";
   }
-  function dirOf(lang){ return lang==="he" ? "rtl" : "ltr"; }
+  function dirOf(lang){ return lang === "he" ? "rtl" : "ltr"; }
 
   let current = getDefaultLang();
-  apply(current);
 
   function apply(lang){
-    current = lang in dict ? lang : "en";
+    current = dict[lang] ? lang : "en";
     localStorage.setItem(LS_KEY, current);
     const html = document.documentElement;
     html.lang = current;
     html.dir = dirOf(current);
 
-    // עדכון טקסטים לפי data-i18n
     document.querySelectorAll("[data-i18n]").forEach(el=>{
       const key = el.getAttribute("data-i18n");
       const val = dict[current][key];
-      if (val!=null) {
+      if (val != null) {
         if (el.hasAttribute("data-i18n-html")) el.innerHTML = val;
         else el.textContent = val;
       }
     });
 
-    window.dispatchEvent(new CustomEvent("i18n:change", {detail:{lang:current}}));
+    window.dispatchEvent(new CustomEvent("i18n:change",{detail:{lang:current}}));
   }
 
   function t(key){ return dict[current][key] ?? key; }
 
+  // החלה ראשונית (תעדכן dir/lang; טקסטים יעדכנו שוב אחרי DOMContentLoaded)
+  apply(current);
+
   return { set: apply, t, get: ()=>current };
 })();
-</script>
