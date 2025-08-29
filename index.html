@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Studly Pro — כלים</title>
   <link rel="icon" href="./assets/logo.png" type="image/png">
+
+  <!-- PWA (שלב 3) -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b1020">
+
   <style>
     :root{ --bg:#0b1020; --fg:#e6e8ee; --muted:#9aa6c1; --card:rgba(255,255,255,.06); --b:rgba(255,255,255,.1); --accent:#6366f1; --accent2:#22d3ee; }
     html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
     .wrap{max-width:1100px;margin:0 auto;padding:28px}
-    /* Header: לוגו מימין, ניווט באמצע, שפה משמאל */
     header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:24px}
     .brand{justify-self:start;display:flex;align-items:center;gap:10px}
     .brand img{width:40px;height:40px;border-radius:8px}
@@ -43,12 +47,9 @@
 <body>
   <div class="wrap">
     <header>
-      <!-- מימין -->
       <div class="brand">
         <img src="./assets/logo.png" alt="Studly Pro"><span id="t-brand">Studly Pro</span>
       </div>
-
-      <!-- באמצע -->
       <nav class="tag">
         <a href="./" id="t-nav-home">בית</a>
         <a href="./pomodoro.html" id="t-nav-pomodoro">Pomodoro</a>
@@ -57,8 +58,6 @@
         <a href="./tasks.html" id="t-nav-tasks">Tasks</a>
         <a href="./flashcards.html" id="t-nav-flash">Flashcards</a>
       </nav>
-
-      <!-- משמאל -->
       <div class="lang">
         <button class="btn" id="btn-he">עברית</button>
         <button class="btn" id="btn-en">English</button>
@@ -70,35 +69,30 @@
       <p class="tag" id="t-hero-tag">כלי לימוד ופרודוקטיביות בחינם.</p>
 
       <div class="grid">
-        <!-- Pomodoro -->
         <a class="card" href="./pomodoro.html">
           <h3 id="t-card-pomo-title">שעון פומודורו</h3>
           <p id="t-card-pomo-desc">טיימר עם טבעת התקדמות, הפסקות קצרות/ארוכות, Auto-start ושמירה מקומית.</p>
           <span class="btn" id="t-card-open-1">פתח</span>
         </a>
 
-        <!-- Exam calculator -->
         <a class="card" href="./exam.html">
           <h3 id="t-card-exam-title">מחשבון מבחנים</h3>
           <p id="t-card-exam-desc">חשב ציון לפי תשובות נכונות או לפי טעויות.</p>
           <span class="btn" id="t-card-open-2">פתח</span>
         </a>
 
-        <!-- Degree calculator -->
         <a class="card" href="./degree.html">
           <h3 id="t-card-degree-title">מחשבון תואר</h3>
           <p id="t-card-degree-desc">ממוצע משוקלל לפי נקודות זכות.</p>
           <span class="btn" id="t-card-open-5">פתח</span>
         </a>
 
-        <!-- Tasks (placeholder) -->
         <a class="card" href="./tasks.html">
           <h3 id="t-card-tasks-title">Task List (בקרוב)</h3>
           <p id="t-card-tasks-desc">רשימת משימות פשוטה עם שמירה בדפדפן.</p>
           <span class="btn" id="t-card-open-3">פתח</span>
         </a>
 
-        <!-- Flashcards (placeholder) -->
         <a class="card" href="./flashcards.html">
           <h3 id="t-card-flash-title">Flashcards (בקרוב)</h3>
           <p id="t-card-flash-desc">כרטיסיות לימוד חכמות ללמידה מהירה.</p>
@@ -111,7 +105,6 @@
   </div>
 
   <script>
-    // מילון שפות (ללא שינוי פריסה)
     const dict = {
       he: {
         brand:"Studly Pro",
@@ -145,7 +138,6 @@
       }
     };
     const LSKEY = 'studlypro:lang';
-
     const els = {
       brand: document.getElementById('t-brand'),
       nav_home: document.getElementById('t-nav-home'),
@@ -175,7 +167,6 @@
       btnHe: document.getElementById('btn-he'),
       btnEn: document.getElementById('btn-en'),
     };
-
     function applyLang(lang){
       const d = dict[lang] || dict.he;
       els.brand.textContent = d.brand;
@@ -187,7 +178,6 @@
       els.nav_flash.textContent = d.nav_flash;
       els.hero_title.textContent = d.hero_title;
       els.hero_tag.textContent = d.hero_tag;
-
       els.card_pomo_title.textContent = d.card_pomo_title;
       els.card_pomo_desc.textContent = d.card_pomo_desc;
       els.card_exam_title.textContent = d.card_exam_title;
@@ -198,27 +188,28 @@
       els.card_tasks_desc.textContent = d.card_tasks_desc;
       els.card_flash_title.textContent = d.card_flash_title;
       els.card_flash_desc.textContent = d.card_flash_desc;
-
       els.open1.textContent = d.open;
       els.open2.textContent = d.open;
       els.open5.textContent = d.open;
       els.open3.textContent = d.open;
       els.open4.textContent = d.open;
-
       els.footer.textContent = d.footer;
-
       els.btnHe.classList.toggle('active', lang==='he');
       els.btnEn.classList.toggle('active', lang==='en');
-
       localStorage.setItem(LSKEY, lang);
     }
-
-    // אתחול
     applyLang(localStorage.getItem(LSKEY) || 'he');
-
-    // האזנה ללחצנים
     els.btnHe.addEventListener('click', ()=>applyLang('he'));
     els.btnEn.addEventListener('click', ()=>applyLang('en'));
+  </script>
+
+  <!-- PWA SW register (שלב 4) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/studly-tools/sw.js').catch(console.error);
+      });
+    }
   </script>
 </body>
 </html>
