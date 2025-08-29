@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Studly Pro — Pomodoro</title>
   <link rel="icon" href="./assets/logo.png" type="image/png">
+
+  <!-- PWA (שלב 3) -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b1020">
+
   <style>
     :root{ --bg:#0b1020; --fg:#e6e8ee; --muted:#9aa6c1; --card:rgba(255,255,255,.06); --b:rgba(255,255,255,.1); --accent:#6366f1; --accent2:#22d3ee; }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial }
     .wrap{ max-width:1100px; margin:0 auto; padding:24px }
-
-    /* Header כמו בעמוד הבית: לוגו מימין, ניווט באמצע, שפה משמאל */
     header{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; margin-bottom:24px }
     .brand{ justify-self:start; display:flex; align-items:center; gap:10px }
     .brand img{ width:40px; height:40px; border-radius:8px }
@@ -21,8 +24,6 @@
     .lang{ justify-self:end; display:flex; gap:8px }
     .lang .btn{ appearance:none; border:0; padding:8px 12px; border-radius:12px; font-weight:700; cursor:pointer; background:#1b2238; color:var(--fg); border:1px solid var(--b) }
     .lang .btn.active{ outline:2px solid var(--accent) }
-
-    /* Page layout */
     .grid{ display:grid; gap:24px; grid-template-columns:1fr; }
     @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
     .card{ background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
@@ -41,7 +42,6 @@
 </head>
 <body>
   <div class="wrap">
-    <!-- Header -->
     <header>
       <div class="brand">
         <img src="./assets/logo.png" alt="Studly Pro"><span id="t-brand">Studly Pro</span>
@@ -49,6 +49,8 @@
       <nav>
         <a href="./" id="t-nav-home">בית</a>
         <a href="./pomodoro.html" id="t-nav-pomodoro">Pomodoro</a>
+        <a href="./exam.html" id="t-nav-exam">Exam</a>
+        <a href="./degree.html" id="t-nav-degree">Degree</a>
         <a href="./tasks.html" id="t-nav-tasks">Tasks</a>
         <a href="./flashcards.html" id="t-nav-flash">Flashcards</a>
       </nav>
@@ -58,7 +60,6 @@
       </div>
     </header>
 
-    <!-- תוכן העמוד -->
     <div class="grid">
       <div class="card">
         <h2 id="h2-component">Pomodoro Pro — Component</h2>
@@ -90,11 +91,10 @@
   </div>
 
   <script>
-    /* === מילון שפות (לא משנה פריסה) === */
     const DICT = {
       he: {
         brand:"Studly Pro",
-        nav_home:"בית", nav_pomodoro:"Pomodoro", nav_tasks:"Tasks", nav_flash:"Flashcards",
+        nav_home:"בית", nav_pomodoro:"Pomodoro", nav_exam:"Exam", nav_degree:"Degree", nav_tasks:"Tasks", nav_flash:"Flashcards",
         footer:"© Studly Pro — בנוי על GitHub Pages",
         page_component:"שעון פומודורו — קומפוננטה",
         page_controls:"בקרות חיצוניות (דוגמה)",
@@ -107,7 +107,7 @@
       },
       en: {
         brand:"Studly Pro",
-        nav_home:"Home", nav_pomodoro:"Pomodoro", nav_tasks:"Tasks", nav_flash:"Flashcards",
+        nav_home:"Home", nav_pomodoro:"Pomodoro", nav_exam:"Exam", nav_degree:"Degree", nav_tasks:"Tasks", nav_flash:"Flashcards",
         footer:"Built on GitHub Pages — Studly Pro ©",
         page_component:"Pomodoro Pro — Component",
         page_controls:"External Controls (example)",
@@ -120,12 +120,12 @@
       }
     };
     const LANG_KEY = 'studlypro:lang';
-
-    /* === Header & page text wiring === */
     const elsHeader = {
       brand: document.getElementById('t-brand'),
       nav_home: document.getElementById('t-nav-home'),
       nav_pomodoro: document.getElementById('t-nav-pomodoro'),
+      nav_exam: document.getElementById('t-nav-exam'),
+      nav_degree: document.getElementById('t-nav-degree'),
       nav_tasks: document.getElementById('t-nav-tasks'),
       nav_flash: document.getElementById('t-nav-flash'),
       footer: document.getElementById('t-footer'),
@@ -146,22 +146,18 @@
         toggle:document.getElementById('btn-toggle'),
       }
     };
-
     function applyLang(lang){
       const d = DICT[lang] || DICT.he;
-
-      // Header
       elsHeader.brand.textContent = d.brand;
       elsHeader.nav_home.textContent = d.nav_home;
       elsHeader.nav_pomodoro.textContent = d.nav_pomodoro;
+      elsHeader.nav_exam.textContent = d.nav_exam;
+      elsHeader.nav_degree.textContent = d.nav_degree;
       elsHeader.nav_tasks.textContent = d.nav_tasks;
       elsHeader.nav_flash.textContent = d.nav_flash;
       elsHeader.footer.textContent = d.footer;
-
       elsHeader.btnHe.classList.toggle('active', lang==='he');
       elsHeader.btnEn.classList.toggle('active', lang==='en');
-
-      // Page texts
       elsPage.h2Component.textContent = d.page_component;
       elsPage.h2Controls.textContent  = d.page_controls;
       elsPage.tip.innerHTML = d.tip;
@@ -172,50 +168,32 @@
       elsPage.ext.short.textContent  = d.short;
       elsPage.ext.long.textContent   = d.long;
       elsPage.ext.toggle.textContent = d.toggle;
-
-      // Update component (Shadow DOM)
       const comp = document.getElementById('pom1');
       if (comp && typeof comp.setLanguage === 'function') comp.setLanguage(lang);
-
-      // Save & broadcast
       localStorage.setItem(LANG_KEY, lang);
       window.dispatchEvent(new CustomEvent('lang:change', {detail:{lang}}));
     }
-
-    elsHeader.btnHe.addEventListener('click', ()=> applyLang('he'));
-    elsHeader.btnEn.addEventListener('click', ()=> applyLang('en'));
-
-    // Init
+    document.getElementById('btn-he').addEventListener('click', ()=> applyLang('he'));
+    document.getElementById('btn-en').addEventListener('click', ()=> applyLang('en'));
     applyLang(localStorage.getItem(LANG_KEY) || 'he');
 
-    /* === Pomodoro Web Component (with language support) === */
     (function(){
       const STORAGE_KEY = 'pomodoro-pro:settings:v1';
-
       class PomodoroPro extends HTMLElement {
         static get observedAttributes(){ return ['autostart','controls']; }
         constructor(){
           super();
           this._shadow = this.attachShadow({mode:'open'});
           this._dom = {};
-          this._raf = 0;
-          this._running = false;
-          this._start = 0;
-          this._elapsedBeforePause = 0;
-          this._mode = 'work';
-          this._cycleCount = 0;
-          this._lang = localStorage.getItem(LANG_KEY) || 'he';
-
+          this._raf = 0; this._running = false; this._start = 0; this._elapsedBeforePause = 0;
+          this._mode = 'work'; this._cycleCount = 0; this._lang = localStorage.getItem(LANG_KEY) || 'he';
           const saved = this._loadSettings();
           this._durations = saved?.durations || { work: 25*60, short: 5*60, long: 15*60 };
           this._autoStart = saved?.autoStart ?? (this.getAttribute('autostart') === 'true' || this.getAttribute('autostart') === '');
-
           this._render();
           window.addEventListener('lang:change', (e)=> this.setLanguage(e.detail.lang));
         }
-
         _t(k){ return (DICT[this._lang]||DICT.en)[k] || k; }
-
         _render(){
           this._shadow.innerHTML = `
             <style>
@@ -276,167 +254,121 @@
               <div class="toggle"><input id="auto" type="checkbox"> <label id="lbl-auto" for="auto">${this._t('toggle')}</label></div>
             </div>
           `;
-
-          const $ = (sel, root=this._shadow) => root.querySelector(sel);
+          const $ = (s, r=this._shadow)=>r.querySelector(s);
           this._dom = {
-            tabs: [...this._shadow.querySelectorAll('.tab')],
-            bar: $('#bar'), time: $('#time'), mode: $('#mode'),
-            controls: $('#controls'),
-            start: $('#start'), pause: $('#pause'), reset: $('#reset'),
-            work: $('#work'), short: $('#short'), long: $('#long'),
-            lblWork: $('#lbl-work'), lblShort: $('#lbl-short'), lblLong: $('#lbl-long'),
-            lblAuto: $('#lbl-auto'),
-            auto: $('#auto')
+            tabs:[...this._shadow.querySelectorAll('.tab')],
+            bar:$('#bar'), time:$('#time'), mode:$('#mode'), controls:$('#controls'),
+            start:$('#start'), pause:$('#pause'), reset:$('#reset'),
+            work:$('#work'), short:$('#short'), long:$('#long'),
+            lblWork:$('#lbl-work'), lblShort:$('#lbl-short'), lblLong:$('#lbl-long'),
+            lblAuto:$('#lbl-auto'), auto:$('#auto')
           };
-
-          this._dom.start.addEventListener('click', () => this.start());
-          this._dom.pause.addEventListener('click', () => this.pause());
-          this._dom.reset.addEventListener('click', () => this.reset());
-          this._dom.tabs.forEach(t => t.addEventListener('click', () => this.setMode(t.dataset.mode)));
-          [this._dom.work, this._dom.short, this._dom.long].forEach(inp => inp.addEventListener('change', () => {
-            const mins = { work:+this._dom.work.value||25, short:+this._dom.short.value||5, long:+this._dom.long.value||15 };
+          this._dom.start.addEventListener('click',()=>this.start());
+          this._dom.pause.addEventListener('click',()=>this.pause());
+          this._dom.reset.addEventListener('click',()=>this.reset());
+          this._dom.tabs.forEach(t=>t.addEventListener('click',()=>this.setMode(t.dataset.mode)));
+          [this._dom.work,this._dom.short,this._dom.long].forEach(inp=>inp.addEventListener('change',()=>{
+            const mins={work:+this._dom.work.value||25, short:+this._dom.short.value||5, long:+this._dom.long.value||15};
             this.setDurations(mins);
           }));
-          this._dom.auto.checked = !!this._autoStart;
-          this._dom.auto.addEventListener('change', () => { this.setAutoStart(this._dom.auto.checked); });
-
-          window.addEventListener('message', (evt) => {
-            const d = evt?.data || {}; if(!d || !d.action) return;
-            if (d.action === 'start') this.start();
-            if (d.action === 'pause') this.pause();
-            if (d.action === 'reset') this.reset();
-            if (d.action === 'mode' && d.value) this.setMode(String(d.value));
+          this._dom.auto.checked=!!this._autoStart;
+          this._dom.auto.addEventListener('change',()=>{this.setAutoStart(this._dom.auto.checked);});
+          window.addEventListener('message',(evt)=>{
+            const d=evt?.data||{}; if(!d||!d.action) return;
+            if(d.action==='start') this.start();
+            if(d.action==='pause') this.pause();
+            if(d.action==='reset') this.reset();
+            if(d.action==='mode'&&d.value) this.setMode(String(d.value));
           });
-
-          this._applyModeUI();
-          this._updateTimeLabel(this._durations[this._mode]*1000);
-          this._drawProgress(0);
-          this._updateControlsVisibility();
+          this._applyModeUI(); this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); this._updateControlsVisibility();
         }
-
-        attributeChangedCallback(name, _o, n){
-          if(name==='autostart'){ this._autoStart = n === '' || n === 'true'; this._dom.auto.checked = !!this._autoStart; this._saveSettings(); }
-          if(name==='controls'){ this._updateControlsVisibility(); }
+        attributeChangedCallback(n,_o,v){
+          if(n==='autostart'){ this._autoStart = v===''||v==='true'; this._dom.auto.checked=!!this._autoStart; this._saveSettings(); }
+          if(n==='controls'){ this._updateControlsVisibility(); }
         }
         _updateControlsVisibility(){
-          const mode = (this.getAttribute('controls')||'internal').toLowerCase();
-          this._dom.controls.classList.toggle('hidden', mode === 'external' || mode === 'none');
+          const m=(this.getAttribute('controls')||'internal').toLowerCase();
+          this._dom.controls.classList.toggle('hidden', m==='external'||m==='none');
         }
-
-        start(){ if(this._running) return; this._running = true; this._start = performance.now(); this._tick(); this._emit('state',{running:true, mode:this._mode}); }
-        pause(){ if(!this._running) return; this._running = false; cancelAnimationFrame(this._raf); this._elapsedBeforePause += performance.now() - this._start; this._emit('state',{running:false, mode:this._mode}); }
-        reset(){ this._running = false; cancelAnimationFrame(this._raf); this._elapsedBeforePause = 0; this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); this._emit('state',{running:false, mode:this._mode}); }
+        start(){ if(this._running) return; this._running=true; this._start=performance.now(); this._tick(); this._emit('state',{running:true,mode:this._mode}); }
+        pause(){ if(!this._running) return; this._running=false; cancelAnimationFrame(this._raf); this._elapsedBeforePause+=performance.now()-this._start; this._emit('state',{running:false,mode:this._mode}); }
+        reset(){ this._running=false; cancelAnimationFrame(this._raf); this._elapsedBeforePause=0; this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); this._emit('state',{running:false,mode:this._mode}); }
         setMode(mode){
-          mode = String(mode||'work').toLowerCase();
-          if(!['work','short','long'].includes(mode)) return;
-          const wasRunning = this._running; this.pause(); this._mode = mode; this._elapsedBeforePause = 0; this._applyModeUI();
-          this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); if(wasRunning) this.start(); this._emit('mode',{mode});
+          mode=String(mode||'work').toLowerCase(); if(!['work','short','long'].includes(mode)) return;
+          const was=this._running; this.pause(); this._mode=mode; this._elapsedBeforePause=0; this._applyModeUI();
+          this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); if(was) this.start(); this._emit('mode',{mode});
         }
-        setDurations({work, short, long}){
-          const mins = { work: Math.max(1, Math.floor(work ?? (this._durations.work/60))),
-                         short: Math.max(1, Math.floor(short ?? (this._durations.short/60))),
-                         long: Math.max(1, Math.floor(long ?? (this._durations.long/60))) };
-          this._durations = { work: mins.work*60, short: mins.short*60, long: mins.long*60 };
+        setDurations({work,short,long}){
+          const mins={work:Math.max(1,Math.floor(work??(this._durations.work/60))),
+                      short:Math.max(1,Math.floor(short??(this._durations.short/60))),
+                      long:Math.max(1,Math.floor(long??(this._durations.long/60)))};
+          this._durations={work:mins.work*60, short:mins.short*60, long:mins.long*60};
           this._saveSettings(); this.reset();
-          this._dom.work.value = mins.work; this._dom.short.value = mins.short; this._dom.long.value = mins.long;
+          this._dom.work.value=mins.work; this._dom.short.value=mins.short; this._dom.long.value=mins.long;
         }
-        setAutoStart(v){ this._autoStart = !!v; this._dom.auto.checked = !!v; this._saveSettings(); }
+        setAutoStart(v){ this._autoStart=!!v; this._dom.auto.checked=!!v; this._saveSettings(); }
         toggleAutoStart(){ this.setAutoStart(!this._autoStart); }
-
         setLanguage(lang){
-          this._lang = (DICT[lang] ? lang : 'en');
-          this._dom.tabs[0].textContent = this._t('work');
-          this._dom.tabs[1].textContent = this._t('short');
-          this._dom.tabs[2].textContent = this._t('long');
-          this._dom.mode.textContent = (this._mode==='work')?this._t('label_work'):(this._mode==='short'?this._t('label_short'):this._t('label_long'));
-          this._dom.start.textContent = this._t('start');
-          this._dom.pause.textContent = this._t('pause');
-          this._dom.reset.textContent = this._t('reset');
-          this._dom.lblWork.textContent  = this._t('set_work');
-          this._dom.lblShort.textContent = this._t('set_short');
-          this._dom.lblLong.textContent  = this._t('set_long');
-          this._dom.lblAuto.textContent  = this._t('toggle');
+          this._lang = (DICT[lang]?lang:'en');
+          this._dom.tabs[0].textContent=this._t('work');
+          this._dom.tabs[1].textContent=this._t('short');
+          this._dom.tabs[2].textContent=this._t('long');
+          this._dom.mode.textContent=(this._mode==='work')?this._t('label_work'):(this._mode==='short'?this._t('label_short'):this._t('label_long'));
+          this._dom.start.textContent=this._t('start');
+          this._dom.pause.textContent=this._t('pause');
+          this._dom.reset.textContent=this._t('reset');
+          this._dom.lblWork.textContent=this._t('set_work');
+          this._dom.lblShort.textContent=this._t('set_short');
+          this._dom.lblLong.textContent=this._t('set_long');
+          this._dom.lblAuto.textContent=this._t('toggle');
         }
-
         _tick(){
           if(!this._running) return;
-          this._raf = requestAnimationFrame(() => this._tick());
-          const now = performance.now();
-          const total = this._durations[this._mode]*1000;
-          const elapsed = this._elapsedBeforePause + (now - this._start);
-          const remaining = Math.max(0, total - elapsed);
-          const progress = Math.min(1, elapsed / total);
-          this._updateTimeLabel(remaining);
-          this._drawProgress(progress);
-          this._emit('tick',{progress, remainingMs:remaining, mode:this._mode});
-
-          if(remaining <= 0){
-            this._beep();
-            this._running = false; cancelAnimationFrame(this._raf);
-            this._elapsedBeforePause = 0;
-            this._emit('complete',{mode:this._mode});
-            if(this._mode === 'work'){
-              this._cycleCount = (this._cycleCount + 1) % 4;
-              this.setMode(this._cycleCount === 0 ? 'long' : 'short');
-            } else {
-              this.setMode('work');
-            }
+          this._raf=requestAnimationFrame(()=>this._tick());
+          const now=performance.now(), total=this._durations[this._mode]*1000;
+          const elapsed=this._elapsedBeforePause+(now-this._start);
+          const remaining=Math.max(0,total-elapsed);
+          const progress=Math.min(1,elapsed/total);
+          this._updateTimeLabel(remaining); this._drawProgress(progress); this._emit('tick',{progress,remainingMs:remaining,mode:this._mode});
+          if(remaining<=0){
+            this._beep(); this._running=false; cancelAnimationFrame(this._raf);
+            this._elapsedBeforePause=0; this._emit('complete',{mode:this._mode});
+            if(this._mode==='work'){ this._cycleCount=(this._cycleCount+1)%4; this.setMode(this._cycleCount===0?'long':'short'); }
+            else { this.setMode('work'); }
             this.setLanguage(this._lang);
             if(this._autoStart) this.start();
           }
         }
-
         _applyModeUI(){
-          this._dom.mode.textContent = (this._mode==='work')?this._t('label_work'):(this._mode==='short'?this._t('label_short'):this._t('label_long'));
-          const root = this._shadow.host;
+          this._dom.mode.textContent=(this._mode==='work')?this._t('label_work'):(this._mode==='short'?this._t('label_short'):this._t('label_long'));
+          const root=this._shadow.host;
           if(this._mode==='work'){ root.style.setProperty('--primary','#6366f1'); root.style.setProperty('--accent','#22d3ee'); }
           if(this._mode==='short'){ root.style.setProperty('--primary','#10b981'); root.style.setProperty('--accent','#34d399'); }
           if(this._mode==='long'){ root.style.setProperty('--primary','#f59e0b'); root.style.setProperty('--accent','#f97316'); }
         }
-
-        _updateTimeLabel(ms){
-          const totalSec = Math.round(ms/1000);
-          const m = Math.floor(totalSec/60); const s = totalSec%60;
-          this._dom.time.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        }
-
-        _drawProgress(p){
-          const r = 52; const C = 2*Math.PI*r;
-          const offset = C * (1 - p);
-          this._dom.bar.setAttribute('stroke-dashoffset', String(offset));
-        }
-
-        _beep(){
-          try{
-            const ctx = new (window.AudioContext||window.webkitAudioContext)();
-            const o = ctx.createOscillator(); const g = ctx.createGain();
-            o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ctx.destination);
-            const now = ctx.currentTime; g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.4, now+0.02);
-            o.start(); g.gain.exponentialRampToValueAtTime(0.0001, now+0.25); o.stop(now+0.3);
-          }catch(e){}
-        }
-
-        _emit(type, detail){ this.dispatchEvent(new CustomEvent(`pomodoro:${type}`, {bubbles:true, composed:true, detail})); }
+        _updateTimeLabel(ms){ const s=Math.round(ms/1000); const m=Math.floor(s/60), r=s%60; this._dom.time.textContent=`${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`; }
+        _drawProgress(p){ const r=52, C=2*Math.PI*r, off=C*(1-p); this._dom.bar.setAttribute('stroke-dashoffset', String(off)); }
+        _beep(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ctx.destination); const t=ctx.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.4,t+0.02); o.start(); g.gain.exponentialRampToValueAtTime(0.0001,t+0.25); o.stop(t+0.3);}catch(e){} }
+        _emit(type,detail){ this.dispatchEvent(new CustomEvent(`pomodoro:${type}`,{bubbles:true,composed:true,detail})); }
         _loadSettings(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null') }catch(e){ return null } }
         _saveSettings(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({durations:this._durations, autoStart:this._autoStart})) }catch(e){} }
       }
-
       customElements.define('pomodoro-pro', PomodoroPro);
-
-      window.pomodoro = function(id){
-        const el = id ? document.getElementById(id) : document.querySelector('pomodoro-pro');
+      window.pomodoro=function(id){
+        const el=id?document.getElementById(id):document.querySelector('pomodoro-pro');
         if(!el) throw new Error('pomodoro-pro element not found');
-        return {
-          start: ()=> el.start(),
-          pause: ()=> el.pause(),
-          reset: ()=> el.reset(),
-          setMode: (m)=> el.setMode(m),
-          setDurations: (cfg)=> el.setDurations(cfg),
-          setAutoStart: (v)=> el.setAutoStart(v),
-          toggleAutoStart: ()=> el.toggleAutoStart()
-        };
+        return { start:()=>el.start(), pause:()=>el.pause(), reset:()=>el.reset(), setMode:(m)=>el.setMode(m), setDurations:(cfg)=>el.setDurations(cfg), setAutoStart:(v)=>el.setAutoStart(v), toggleAutoStart:()=>el.toggleAutoStart() };
       }
     })();
+  </script>
+
+  <!-- PWA SW register (שלב 4) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/studly-tools/sw.js').catch(console.error);
+      });
+    }
   </script>
 </body>
 </html>
