@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pomodoro Pro (Web)</title>
+  <style>
+    html, body { height: 100%; margin: 0; background: #0b1020; }
+    body { display: grid; place-items: center; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+    .demo-shell { max-width: 900px; width: 100%; padding: 24px; color: #e6e8ee; }
+    .demo-grid { display: grid; gap: 24px; grid-template-columns: 1fr; }
+    @media (min-width: 860px) { .demo-grid { grid-template-columns: 1fr 1fr; } }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08); padding: 20px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); }
+    .card h2 { margin: 0 0 12px; font-size: 18px; font-weight: 600; letter-spacing:.3px; }
+    .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .btn { appearance: none; border: 0; padding: 10px 14px; border-radius: 12px; font-weight: 600; cursor: pointer; background: #2a2f45; color: #e6e8ee; transition: transform .08s ease, box-shadow .2s ease; box-shadow: 0 6px 16px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06); }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn.primary { background: linear-gradient(135deg, #6366f1, #22d3ee); color: #081018; }
+    .muted { opacity:.75; font-size: 12px; }
+    code { background: #12182c; border-radius: 8px; padding: 2px 6px; }
+  </style>
+</head>
+<body>
+  <div class="demo-shell">
+    <div class="demo-grid">
+      <div class="card">
+        <h2>Pomodoro Pro — Component</h2>
+        <pomodoro-pro id="pom1" autostart="false" controls="internal"></pomodoro-pro>
+        <div class="muted" style="margin-top:12px">Tip: Set <code>controls="external"</code> to hide built-in controls and drive it with your own buttons.</div>
+      </div>
+      <div class="card">
+        <h2>External Controls (example)</h2>
+        <div class="row" style="margin-bottom:12px">
+          <button class="btn primary" onclick="pomodoro('pom1').start()">Start</button>
+          <button class="btn" onclick="pomodoro('pom1').pause()">Pause</button>
+          <button class="btn" onclick="pomodoro('pom1').reset()">Reset</button>
+          <button class="btn" onclick="pomodoro('pom1').setMode('work')">Work</button>
+          <button class="btn" onclick="pomodoro('pom1').setMode('short')">Short</button>
+          <button class="btn" onclick="pomodoro('pom1').setMode('long')">Long</button>
+        </div>
+        <div class="row">
+          <button class="btn" onclick="pomodoro('pom1').setDurations({work:25, short:5, long:15})">Reset Durations</button>
+          <button class="btn" onclick="pomodoro('pom1').setDurations({work:50, short:10, long:30})">50/10/30</button>
+          <button class="btn" onclick="pomodoro('pom1').toggleAutoStart()">Toggle Auto-Start</button>
+        </div>
+        <p class="muted">You can also control it via <code>window.postMessage({action:'start'})</code> (useful for Wix HTML iframe).</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const STORAGE_KEY = 'pomodoro-pro:settings:v1';
+
+    class PomodoroPro extends HTMLElement {
+      static get observedAttributes(){ return ['autostart','controls']; }
+      constructor(){
+        super();
+        this._shadow = this.attachShadow({mode:'open'});
+        this._dom = {};
+        this._raf = 0;
+        this._running = false;
+        this._start = 0;
+        this._elapsedBeforePause = 0;
+        this._mode = 'work';
+        this._cycleCount = 0;
+        const saved = this._loadSettings();
+        this._durations = saved?.durations || { work: 25*60, short: 5*60, long: 15*60 };
+        this._autoStart = saved?.autoStart ?? (this.getAttribute('autostart') === 'true' || this.getAttribute('autostart') === '');
+
+        this._shadow.innerHTML = `
+          <style>
+            :host{ --bg:#0d1326; --panel:rgba(255,255,255,.07); --text:#e8ecf7; --sub:#9aa6c1; --primary:#6366f1; --accent:#22d3ee; --danger:#ef4444; display:block; }
+            .wrap{ display:grid; gap:18px; background: var(--panel); border:1px solid rgba(255,255,255,.08); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06); }
+            .ring{ width: 240px; height: 240px; margin-inline:auto; position:relative; }
+            .ring svg{ width:100%; height:100%; transform: rotate(-90deg); }
+            .label{ position:absolute; inset:0; display:grid; place-items:center; text-align:center; }
+            .time{ font-weight:800; font-size: 36px; letter-spacing:.5px; color: var(--text); }
+            .mode{ margin-top:6px; color: var(--sub); font-size: 12px; letter-spacing: .3px; text-transform: uppercase; }
+            .row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+            button{ appearance:none; border:0; padding:10px 14px; border-radius:12px; font-weight:700; cursor:pointer; color:#0a101e; background: linear-gradient(135deg, var(--primary), var(--accent)); box-shadow: 0 6px 16px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.15); transition: transform .08s ease; }
+            button:hover{ transform: translateY(-1px); }
+            button:active{ transform: translateY(0); }
+            button[variant="ghost"]{ background: #2a2f45; color: var(--text); }
+            .tabs{ display:flex; gap:6px; justify-content:center; }
+            .tab{ font-size:12px; padding:8px 10px; border-radius:10px; cursor:pointer; color: var(--text); background:#1b2238; border:1px solid rgba(255,255,255,.08); }
+            .tab[active]{ outline:2px solid var(--accent); }
+            .settings{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; }
+            .num{ display:grid; gap:6px; text-align:center; }
+            .num label{ font-size:11px; color:var(--sub); }
+            .num input{ width:100%; text-align:center; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.1); background:#0f162d; color:var(--text); font-weight:700; }
+            .toggle{ display:flex; align-items:center; justify-content:center; gap:8px; color:var(--sub); font-size:12px; }
+            .hidden{ display:none !important; }
+          </style>
+          <div class="wrap">
+            <div class="tabs" part="tabs">
+              <div class="tab" data-mode="work">Work</div>
+              <div class="tab" data-mode="short">Short</div>
+              <div class="tab" data-mode="long">Long</div>
+            </div>
+            <div class="ring" part="ring">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <defs>
+                  <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="var(--accent)" />
+                    <stop offset="100%" stop-color="var(--primary)" />
+                  </linearGradient>
+                </defs>
+                <circle cx="60" cy="60" r="52" stroke="#1b2238" stroke-width="12" fill="none" />
+                <circle id="bar" cx="60" cy="60" r="52" stroke="url(#grad)" stroke-linecap="round" stroke-width="12" fill="none" stroke-dasharray="${2*Math.PI*52}" stroke-dashoffset="${2*Math.PI*52}" />
+              </svg>
+              <div class="label">
+                <div class="time" id="time">25:00</div>
+                <div class="mode" id="mode">Work</div>
+              </div>
+            </div>
+            <div class="row" id="controls">
+              <button id="start">Start</button>
+              <button id="pause" variant="ghost">Pause</button>
+              <button id="reset" variant="ghost">Reset</button>
+            </div>
+            <div class="settings" part="settings">
+              <div class="num"><label>Work (min)</label><input id="work" type="number" min="1" value="${(this._durations.work/60)|0}" /></div>
+              <div class="num"><label>Short (min)</label><input id="short" type="number" min="1" value="${(this._durations.short/60)|0}" /></div>
+              <div class="num"><label>Long (min)</label><input id="long" type="number" min="1" value="${(this._durations.long/60)|0}" /></div>
+            </div>
+            <div class="toggle"><input id="auto" type="checkbox"> <label for="auto">Auto-start next session</label></div>
+          </div>
+        `;
+
+        const $ = (sel, root=this._shadow) => root.querySelector(sel);
+        this._dom.tabs = [...this._shadow.querySelectorAll('.tab')];
+        this._dom.bar = $('#bar');
+        this._dom.time = $('#time');
+        this._dom.mode = $('#mode');
+        this._dom.controls = $('#controls');
+        this._dom.start = $('#start');
+        this._dom.pause = $('#pause');
+        this._dom.reset = $('#reset');
+        this._dom.work = $('#work');
+        this._dom.short = $('#short');
+        this._dom.long = $('#long');
+        this._dom.auto = $('#auto');
+
+        this._dom.start.addEventListener('click', () => this.start());
+        this._dom.pause.addEventListener('click', () => this.pause());
+        this._dom.reset.addEventListener('click', () => this.reset());
+        this._dom.tabs.forEach(t => t.addEventListener('click', () => this.setMode(t.dataset.mode)));
+        [this._dom.work, this._dom.short, this._dom.long].forEach(inp => inp.addEventListener('change', () => {
+          const mins = {
+            work: parseInt(this._dom.work.value || '25', 10),
+            short: parseInt(this._dom.short.value || '5', 10),
+            long: parseInt(this._dom.long.value || '15', 10)
+          };
+          this.setDurations({work: mins.work, short: mins.short, long: mins.long});
+        }));
+        this._dom.auto.checked = !!this._autoStart;
+        this._dom.auto.addEventListener('change', () => { this.setAutoStart(this._dom.auto.checked); });
+
+        window.addEventListener('message', (evt) => {
+          const d = evt?.data || {}; if(!d || !d.action) return;
+          if (d.action === 'start') this.start();
+          if (d.action === 'pause') this.pause();
+          if (d.action === 'reset') this.reset();
+          if (d.action === 'mode' && d.value) this.setMode(String(d.value));
+        });
+
+        this._applyModeUI();
+        this._updateTimeLabel(this._durations[this._mode]*1000);
+        this._drawProgress(0);
+        this._updateControlsVisibility();
+      }
+
+      attributeChangedCallback(name, oldVal, newVal){
+        if(name==='autostart'){ this._autoStart = newVal === '' || newVal === 'true'; this._dom.auto.checked = !!this._autoStart; this._saveSettings(); }
+        if(name==='controls'){ this._updateControlsVisibility(); }
+      }
+
+      _updateControlsVisibility(){
+        const mode = (this.getAttribute('controls')||'internal').toLowerCase();
+        if(mode === 'external' || mode === 'none') this._dom.controls.classList.add('hidden');
+        else this._dom.controls.classList.remove('hidden');
+      }
+
+      start(){ if(this._running) return; this._running = true; this._start = performance.now(); this._tick(); this._emit('state',{running:true, mode:this._mode}); }
+      pause(){ if(!this._running) return; this._running = false; cancelAnimationFrame(this._raf); this._elapsedBeforePause += performance.now() - this._start; this._emit('state',{running:false, mode:this._mode}); }
+      reset(){ this._running = false; cancelAnimationFrame(this._raf); this._elapsedBeforePause = 0; this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); this._emit('state',{running:false, mode:this._mode}); }
+      setMode(mode){ mode = String(mode||'work').toLowerCase(); if(!['work','short','long'].includes(mode)) return; const wasRunning = this._running; this.pause(); this._mode = mode; this._elapsedBeforePause = 0; this._applyModeUI(); this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); if(wasRunning) this.start(); this._emit('mode',{mode}); }
+      setDurations({work, short, long}){ const mins = {
+        work: Math.max(1, Math.floor(work ?? (this._durations.work/60))),
+        short: Math.max(1, Math.floor(short ?? (this._durations.short/60))),
+        long: Math.max(1, Math.floor(long ?? (this._durations.long/60)))
+      }; this._durations = { work: mins.work*60, short: mins.short*60, long: mins.long*60 }; this._saveSettings(); this.reset(); this._dom.work.value = mins.work; this._dom.short.value = mins.short; this._dom.long.value = mins.long; }
+      setAutoStart(v){ this._autoStart = !!v; this._dom.auto.checked = !!v; this._saveSettings(); }
+      toggleAutoStart(){ this.setAutoStart(!this._autoStart); }
+
+      _tick(){
+        if(!this._running) return;
+        this._raf = requestAnimationFrame(() => this._tick());
+        const now = performance.now();
+        const total = this._durations[this._mode]*1000;
+        const elapsed = this._elapsedBeforePause + (now - this._start);
+        const remaining = Math.max(0, total - elapsed);
+        const progress = Math.min(1, elapsed / total);
+        this._updateTimeLabel(remaining);
+        this._drawProgress(progress);
+        this._emit('tick',{progress, remainingMs:remaining, mode:this._mode});
+
+        if(remaining <= 0){
+          this._beep();
+          this._running = false; cancelAnimationFrame(this._raf);
+          this._elapsedBeforePause = 0;
+          this._emit('complete',{mode:this._mode});
+
+          if(this._mode === 'work'){
+            this._cycleCount = (this._cycleCount + 1) % 4;
+            this.setMode(this._cycleCount === 0 ? 'long' : 'short');
+          } else {
+            this.setMode('work');
+          }
+          if(this._autoStart) this.start();
+        }
+      }
+
+      _applyModeUI(){
+        const label = this._mode === 'work' ? 'Work' : (this._mode === 'short' ? 'Short Break' : 'Long Break');
+        this._dom.mode.textContent = label;
+        const root = this._shadow.host;
+        if(this._mode==='work'){ root.style.setProperty('--primary','#6366f1'); root.style.setProperty('--accent','#22d3ee'); }
+        if(this._mode==='short'){ root.style.setProperty('--primary','#10b981'); root.style.setProperty('--accent','#34d399'); }
+        if(this._mode==='long'){ root.style.setProperty('--primary','#f59e0b'); root.style.setProperty('--accent','#f97316'); }
+      }
+
+      _updateTimeLabel(ms){
+        const totalSec = Math.round(ms/1000);
+        const m = Math.floor(totalSec/60); const s = totalSec%60;
+        this._dom.time.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      }
+
+      _drawProgress(p){
+        const r = 52; const C = 2*Math.PI*r;
+        const offset = C * (1 - p);
+        this._dom.bar.setAttribute('stroke-dashoffset', String(offset));
+      }
+
+      _beep(){
+        try{
+          const ctx = new (window.AudioContext||window.webkitAudioContext)();
+          const o = ctx.createOscillator(); const g = ctx.createGain();
+          o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ctx.destination);
+          const now = ctx.currentTime; g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.4, now+0.02);
+          o.start(); g.gain.exponentialRampToValueAtTime(0.0001, now+0.25); o.stop(now+0.3);
+        }catch(e){}
+      }
+
+      _emit(type, detail){ this.dispatchEvent(new CustomEvent(`pomodoro:${type}`, {bubbles:true, composed:true, detail})); }
+      _loadSettings(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null') }catch(e){ return null } }
+      _saveSettings(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({durations:this._durations, autoStart:this._autoStart})) }catch(e){} }
+    }
+
+    customElements.define('pomodoro-pro', PomodoroPro);
+
+    window.pomodoro = function(id){
+      const el = id ? document.getElementById(id) : document.querySelector('pomodoro-pro');
+      if(!el) throw new Error('pomodoro-pro element not found');
+      return {
+        start: ()=> el.start(),
+        pause: ()=> el.pause(),
+        reset: ()=> el.reset(),
+        setMode: (m)=> el.setMode(m),
+        setDurations: (cfg)=> el.setDurations(cfg),
+        setAutoStart: (v)=> el.setAutoStart(v),
+        toggleAutoStart: ()=> el.toggleAutoStart()
+      };
+    }
+  })();
+  </script>
+</body>
+</html>
