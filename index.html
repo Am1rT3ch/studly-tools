@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Studly Pro — Tools</title>
+  <title>Studly Pro — כלים</title>
   <link rel="icon" href="./assets/logo.png" type="image/png">
   <style>
     :root{ --bg:#0b1020; --fg:#e6e8ee; --muted:#9aa6c1; --card:rgba(255,255,255,.06); --b:rgba(255,255,255,.1); --accent:#6366f1; --accent2:#22d3ee; }
@@ -29,13 +29,14 @@
   </style>
 </head>
 <body>
-  <!-- i18n engine -->
+  <!-- מנוע התרגום -->
   <script src="./i18n.js"></script>
 
   <div class="wrap">
     <header>
       <div class="brand">
-        <img src="./assets/logo.png" alt="logo"><span data-i18n="brand">Studly Pro</span>
+        <img src="./assets/logo.png" alt="logo">
+        <span data-i18n="brand">Studly Pro</span>
       </div>
 
       <nav class="tag">
@@ -80,7 +81,7 @@
   </div>
 
   <script>
-    // סנכרון הכיתוב הראשוני לפי שפה שנשמרה
+    // עדכון טקסטים אחרי שה-DOM נטען
     window.addEventListener("DOMContentLoaded", ()=> i18n.set(i18n.get()));
   </script>
 </body>
