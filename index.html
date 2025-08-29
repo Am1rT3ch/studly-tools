@@ -9,6 +9,7 @@
     :root{ --bg:#0b1020; --fg:#e6e8ee; --muted:#9aa6c1; --card:rgba(255,255,255,.06); --b:rgba(255,255,255,.1); --accent:#6366f1; --accent2:#22d3ee; }
     html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
     .wrap{max-width:1100px;margin:0 auto;padding:28px}
+    /* Header: לוגו מימין, ניווט באמצע, שפה משמאל */
     header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:24px}
     .brand{justify-self:start;display:flex;align-items:center;gap:10px}
     .brand img{width:40px;height:40px;border-radius:8px}
@@ -22,11 +23,20 @@
     h1{margin:8px 0 16px;font-size:26px}
     .tag{color:var(--muted);font-size:14px}
     .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-    .card{background:linear-gradient(180deg,var(--card),rgba(255,255,255,.03));border:1px solid var(--b);border-radius:18px;padding:18px;text-decoration:none;color:var(--fg);transition:transform .08s,box-shadow .2s}
+    .card{
+      background:linear-gradient(180deg,var(--card),rgba(255,255,255,.03));
+      border:1px solid var(--b); border-radius:18px; padding:18px;
+      text-decoration:none; color:var(--fg);
+      transition:transform .08s ease, box-shadow .2s ease;
+    }
     .card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.35)}
     .card h3{margin:0 0 6px;font-size:18px}
     .card p{margin:0;color:var(--muted);font-size:14px}
-    .btn{display:inline-block;margin-top:10px;padding:8px 12px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b1020;font-weight:700;text-decoration:none}
+    .btn{
+      display:inline-block;margin-top:10px;padding:8px 12px;border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#0b1020;font-weight:700;text-decoration:none
+    }
     footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
   </style>
 </head>
@@ -39,9 +49,10 @@
       </div>
 
       <!-- באמצע -->
-      <nav>
+      <nav class="tag">
         <a href="./" id="t-nav-home">בית</a>
         <a href="./pomodoro.html" id="t-nav-pomodoro">Pomodoro</a>
+        <a href="./exam.html" id="t-nav-exam">Exam</a>
         <a href="./tasks.html" id="t-nav-tasks">Tasks</a>
         <a href="./flashcards.html" id="t-nav-flash">Flashcards</a>
       </nav>
@@ -61,19 +72,25 @@
         <a class="card" href="./pomodoro.html">
           <h3 id="t-card-pomo-title">שעון פומודורו</h3>
           <p id="t-card-pomo-desc">טיימר עם טבעת התקדמות, הפסקות קצרות/ארוכות, Auto-start ושמירה מקומית.</p>
-          <span class="btn" id="t-open">פתח</span>
+          <span class="btn" id="t-card-open-1">פתח</span>
+        </a>
+
+        <a class="card" href="./exam.html">
+          <h3 id="t-card-exam-title">מחשבון מבחנים</h3>
+          <p id="t-card-exam-desc">חשב ציון לפי תשובות נכונות או לפי טעויות.</p>
+          <span class="btn" id="t-card-open-2">פתח</span>
         </a>
 
         <a class="card" href="./tasks.html">
           <h3 id="t-card-tasks-title">Task List (בקרוב)</h3>
           <p id="t-card-tasks-desc">רשימת משימות פשוטה עם שמירה בדפדפן.</p>
-          <span class="btn" id="t-open-2">פתח</span>
+          <span class="btn" id="t-card-open-3">פתח</span>
         </a>
 
         <a class="card" href="./flashcards.html">
           <h3 id="t-card-flash-title">Flashcards (בקרוב)</h3>
           <p id="t-card-flash-desc">כרטיסיות לימוד חכמות ללמידה מהירה.</p>
-          <span class="btn" id="t-open-3">פתח</span>
+          <span class="btn" id="t-card-open-4">פתח</span>
         </a>
       </div>
     </main>
@@ -82,14 +99,16 @@
   </div>
 
   <script>
-    // מילונים — עברית (ברירת מחדל) ואנגלית. הפריסה לא משתנה.
+    // מילון שפות (ללא שינוי פריסה)
     const dict = {
       he: {
         brand:"Studly Pro",
-        nav_home:"בית", nav_pomodoro:"Pomodoro", nav_tasks:"Tasks", nav_flash:"Flashcards",
+        nav_home:"בית", nav_pomodoro:"Pomodoro", nav_exam:"Exam", nav_tasks:"Tasks", nav_flash:"Flashcards",
         hero_title:"ברוך הבא ל־Studly Pro", hero_tag:"כלי לימוד ופרודוקטיביות בחינם.",
         card_pomo_title:"שעון פומודורו",
         card_pomo_desc:"טיימר עם טבעת התקדמות, הפסקות קצרות/ארוכות, Auto-start ושמירה מקומית.",
+        card_exam_title:"מחשבון מבחנים",
+        card_exam_desc:"חשב ציון לפי תשובות נכונות או לפי טעויות.",
         card_tasks_title:"Task List (בקרוב)", card_tasks_desc:"רשימת משימות פשוטה עם שמירה בדפדפן.",
         card_flash_title:"Flashcards (בקרוב)", card_flash_desc:"כרטיסיות לימוד חכמות ללמידה מהירה.",
         open:"פתח",
@@ -97,34 +116,41 @@
       },
       en: {
         brand:"Studly Pro",
-        nav_home:"Home", nav_pomodoro:"Pomodoro", nav_tasks:"Tasks", nav_flash:"Flashcards",
+        nav_home:"Home", nav_pomodoro:"Pomodoro", nav_exam:"Exam", nav_tasks:"Tasks", nav_flash:"Flashcards",
         hero_title:"Welcome to Studly Pro", hero_tag:"Free study & productivity tools.",
         card_pomo_title:"Pomodoro Timer",
         card_pomo_desc:"Timer with progress ring, short/long breaks, Auto-start and local save.",
+        card_exam_title:"Exam Calculator",
+        card_exam_desc:"Compute score by correct answers or by mistakes.",
         card_tasks_title:"Task List (soon)", card_tasks_desc:"Simple task list with browser storage.",
         card_flash_title:"Flashcards (soon)", card_flash_desc:"Smart study flashcards.",
         open:"Open",
         footer:"Built on GitHub Pages — Studly Pro ©",
       }
     };
+    const LSKEY = 'studlypro:lang';
 
     const els = {
       brand: document.getElementById('t-brand'),
       nav_home: document.getElementById('t-nav-home'),
       nav_pomodoro: document.getElementById('t-nav-pomodoro'),
+      nav_exam: document.getElementById('t-nav-exam'),
       nav_tasks: document.getElementById('t-nav-tasks'),
       nav_flash: document.getElementById('t-nav-flash'),
       hero_title: document.getElementById('t-hero-title'),
       hero_tag: document.getElementById('t-hero-tag'),
       card_pomo_title: document.getElementById('t-card-pomo-title'),
       card_pomo_desc: document.getElementById('t-card-pomo-desc'),
+      card_exam_title: document.getElementById('t-card-exam-title'),
+      card_exam_desc: document.getElementById('t-card-exam-desc'),
       card_tasks_title: document.getElementById('t-card-tasks-title'),
       card_tasks_desc: document.getElementById('t-card-tasks-desc'),
       card_flash_title: document.getElementById('t-card-flash-title'),
       card_flash_desc: document.getElementById('t-card-flash-desc'),
-      openA: document.getElementById('t-open'),
-      openB: document.getElementById('t-open-2'),
-      openC: document.getElementById('t-open-3'),
+      open1: document.getElementById('t-card-open-1'),
+      open2: document.getElementById('t-card-open-2'),
+      open3: document.getElementById('t-card-open-3'),
+      open4: document.getElementById('t-card-open-4'),
       footer: document.getElementById('t-footer'),
       btnHe: document.getElementById('btn-he'),
       btnEn: document.getElementById('btn-en'),
@@ -135,31 +161,33 @@
       els.brand.textContent = d.brand;
       els.nav_home.textContent = d.nav_home;
       els.nav_pomodoro.textContent = d.nav_pomodoro;
+      els.nav_exam.textContent = d.nav_exam;
       els.nav_tasks.textContent = d.nav_tasks;
       els.nav_flash.textContent = d.nav_flash;
       els.hero_title.textContent = d.hero_title;
       els.hero_tag.textContent = d.hero_tag;
       els.card_pomo_title.textContent = d.card_pomo_title;
       els.card_pomo_desc.textContent = d.card_pomo_desc;
+      els.card_exam_title.textContent = d.card_exam_title;
+      els.card_exam_desc.textContent = d.card_exam_desc;
       els.card_tasks_title.textContent = d.card_tasks_title;
       els.card_tasks_desc.textContent = d.card_tasks_desc;
       els.card_flash_title.textContent = d.card_flash_title;
       els.card_flash_desc.textContent = d.card_flash_desc;
-      els.openA.textContent = d.open;
-      els.openB.textContent = d.open;
-      els.openC.textContent = d.open;
+      els.open1.textContent = d.open;
+      els.open2.textContent = d.open;
+      els.open3.textContent = d.open;
+      els.open4.textContent = d.open;
       els.footer.textContent = d.footer;
 
-      // מצב לחצן פעיל
       els.btnHe.classList.toggle('active', lang==='he');
       els.btnEn.classList.toggle('active', lang==='en');
 
-      localStorage.setItem('studlypro:lang', lang);
+      localStorage.setItem(LSKEY, lang);
     }
 
     // אתחול
-    const initial = localStorage.getItem('studlypro:lang') || 'he';
-    applyLang(initial);
+    applyLang(localStorage.getItem(LSKEY) || 'he');
 
     // האזנה ללחצנים
     els.btnHe.addEventListener('click', ()=>applyLang('he'));
