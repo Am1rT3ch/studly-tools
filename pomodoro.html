@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="ltr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,10 +7,13 @@
   <link rel="icon" href="./assets/logo.png" type="image/png">
   <style>
     html, body { height: 100%; margin: 0; background: #0b1020; }
-    body { display: grid; place-items: center; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
-    .demo-shell { max-width: 900px; width: 100%; padding: 24px; color: #e6e8ee; }
+    body { display: grid; place-items: center; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans"; color:#e6e8ee}
+    .demo-shell { max-width: 1000px; width: 100%; padding: 24px; }
+    .topbar{display:flex; justify-content:flex-end; margin-bottom:16px; gap:8px}
+    .lang-btn{appearance:none;border:0;padding:8px 12px;border-radius:12px;font-weight:700;cursor:pointer;background:#1b2238;color:#e6e8ee;border:1px solid rgba(255,255,255,.12)}
+    .lang-btn.active{outline:2px solid #6366f1}
     .demo-grid { display: grid; gap: 24px; grid-template-columns: 1fr; }
-    @media (min-width: 860px) { .demo-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 900px) { .demo-grid { grid-template-columns: 1fr 1fr; } }
     .card { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08); padding: 20px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); }
     .card h2 { margin: 0 0 12px; font-size: 18px; font-weight: 600; letter-spacing:.3px; }
     .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -24,33 +27,66 @@
 </head>
 <body>
   <div class="demo-shell">
+    <div class="topbar">
+      <button class="lang-btn" id="btn-he">עברית</button>
+      <button class="lang-btn" id="btn-en">English</button>
+    </div>
+
     <div class="demo-grid">
       <div class="card">
-        <h2>Pomodoro Pro — Component</h2>
+        <h2 id="h2-component">Pomodoro Pro — Component</h2>
         <pomodoro-pro id="pom1" autostart="false" controls="internal"></pomodoro-pro>
-        <div class="muted" style="margin-top:12px">Tip: Set <code>controls="external"</code> to hide built-in controls and drive it with your own buttons.</div>
+        <div class="muted" id="tip" style="margin-top:12px">
+          Tip: Set <code>controls="external"</code> to hide built-in controls and drive it with your own buttons.
+        </div>
       </div>
+
       <div class="card">
-        <h2>External Controls (example)</h2>
+        <h2 id="h2-controls">External Controls (example)</h2>
         <div class="row" style="margin-bottom:12px">
-          <button class="btn primary" onclick="pomodoro('pom1').start()">Start</button>
-          <button class="btn" onclick="pomodoro('pom1').pause()">Pause</button>
-          <button class="btn" onclick="pomodoro('pom1').reset()">Reset</button>
-          <button class="btn" onclick="pomodoro('pom1').setMode('work')">Work</button>
-          <button class="btn" onclick="pomodoro('pom1').setMode('short')">Short</button>
-          <button class="btn" onclick="pomodoro('pom1').setMode('long')">Long</button>
+          <button class="btn primary" id="btn-start" onclick="pomodoro('pom1').start()">Start</button>
+          <button class="btn" id="btn-pause" onclick="pomodoro('pom1').pause()">Pause</button>
+          <button class="btn" id="btn-reset" onclick="pomodoro('pom1').reset()">Reset</button>
+          <button class="btn" id="btn-work"  onclick="pomodoro('pom1').setMode('work')">Work</button>
+          <button class="btn" id="btn-short" onclick="pomodoro('pom1').setMode('short')">Short</button>
+          <button class="btn" id="btn-long"  onclick="pomodoro('pom1').setMode('long')">Long</button>
         </div>
         <div class="row">
-          <button class="btn" onclick="pomodoro('pom1').setDurations({work:25, short:5, long:15})">Reset Durations</button>
+          <button class="btn" onclick="pomodoro('pom1').setDurations({work:25, short:5, long:15})">25/5/15</button>
           <button class="btn" onclick="pomodoro('pom1').setDurations({work:50, short:10, long:30})">50/10/30</button>
-          <button class="btn" onclick="pomodoro('pom1').toggleAutoStart()">Toggle Auto-Start</button>
+          <button class="btn" id="btn-toggle" onclick="pomodoro('pom1').toggleAutoStart()">Toggle Auto-Start</button>
         </div>
-        <p class="muted">You can also control it via <code>window.postMessage({action:'start'})</code> (useful for Wix HTML iframe).</p>
       </div>
     </div>
   </div>
 
   <script>
+  // === Language dictionary (no layout change) ===
+  const DICT = {
+    he: {
+      page_component: "שעון פומודורו — קומפוננטה",
+      page_controls: "בקרות חיצוניות (דוגמה)",
+      tip: 'טיפ: אפשר להסתיר כפתורים פנימיים עם <code>controls="external"</code> ולהפעיל בלחצנים חיצוניים.',
+      start:"התחל", pause:"השהה", reset:"איפוס",
+      work:"עבודה", short:"קצרה", long:"ארוכה",
+      toggle:"החלף הפעלה אוטומטית",
+      label_work:"עבודה", label_short:"הפסקה קצרה", label_long:"הפסקה ארוכה",
+      set_work:"עבודה (דקות)", set_short:"קצרה (דקות)", set_long:"ארוכה (דקות)"
+    },
+    en: {
+      page_component: "Pomodoro Pro — Component",
+      page_controls: "External Controls (example)",
+      tip: 'Tip: Set <code>controls="external"</code> to hide built-in controls and drive it with your own buttons.',
+      start:"Start", pause:"Pause", reset:"Reset",
+      work:"Work", short:"Short", long:"Long",
+      toggle:"Toggle Auto-Start",
+      label_work:"Work", label_short:"Short Break", label_long:"Long Break",
+      set_work:"Work (min)", set_short:"Short (min)", set_long:"Long (min)"
+    }
+  };
+  const LANG_KEY = 'studlypro:lang';
+
+  // === Pomodoro component ===
   (function(){
     const STORAGE_KEY = 'pomodoro-pro:settings:v1';
 
@@ -66,10 +102,18 @@
         this._elapsedBeforePause = 0;
         this._mode = 'work';
         this._cycleCount = 0;
+        this._lang = localStorage.getItem(LANG_KEY) || 'he';
+
         const saved = this._loadSettings();
         this._durations = saved?.durations || { work: 25*60, short: 5*60, long: 15*60 };
         this._autoStart = saved?.autoStart ?? (this.getAttribute('autostart') === 'true' || this.getAttribute('autostart') === '');
 
+        this._render();
+        window.addEventListener('lang:change', (e)=> this.setLanguage(e.detail.lang));
+      }
+
+      _render(){
+        const t = (k)=> (DICT[this._lang]||DICT.en)[k] || k;
         this._shadow.innerHTML = `
           <style>
             :host{ --bg:#0d1326; --panel:rgba(255,255,255,.07); --text:#e8ecf7; --sub:#9aa6c1; --primary:#6366f1; --accent:#22d3ee; --danger:#ef4444; display:block; }
@@ -96,9 +140,9 @@
           </style>
           <div class="wrap">
             <div class="tabs" part="tabs">
-              <div class="tab" data-mode="work">Work</div>
-              <div class="tab" data-mode="short">Short</div>
-              <div class="tab" data-mode="long">Long</div>
+              <div class="tab" data-mode="work">${t('work')}</div>
+              <div class="tab" data-mode="short">${t('short')}</div>
+              <div class="tab" data-mode="long">${t('long')}</div>
             </div>
             <div class="ring" part="ring">
               <svg viewBox="0 0 120 120" aria-hidden="true">
@@ -113,20 +157,20 @@
               </svg>
               <div class="label">
                 <div class="time" id="time">25:00</div>
-                <div class="mode" id="mode">Work</div>
+                <div class="mode" id="mode">${t('label_work')}</div>
               </div>
             </div>
             <div class="row" id="controls">
-              <button id="start">Start</button>
-              <button id="pause" variant="ghost">Pause</button>
-              <button id="reset" variant="ghost">Reset</button>
+              <button id="start">${t('start')}</button>
+              <button id="pause" variant="ghost">${t('pause')}</button>
+              <button id="reset" variant="ghost">${t('reset')}</button>
             </div>
             <div class="settings" part="settings">
-              <div class="num"><label>Work (min)</label><input id="work" type="number" min="1" value="${(this._durations.work/60)|0}" /></div>
-              <div class="num"><label>Short (min)</label><input id="short" type="number" min="1" value="${(this._durations.short/60)|0}" /></div>
-              <div class="num"><label>Long (min)</label><input id="long" type="number" min="1" value="${(this._durations.long/60)|0}" /></div>
+              <div class="num"><label id="lbl-work">${t('set_work')}</label><input id="work" type="number" min="1" value="${(this._durations.work/60)|0}" /></div>
+              <div class="num"><label id="lbl-short">${t('set_short')}</label><input id="short" type="number" min="1" value="${(this._durations.short/60)|0}" /></div>
+              <div class="num"><label id="lbl-long">${t('set_long')}</label><input id="long" type="number" min="1" value="${(this._durations.long/60)|0}" /></div>
             </div>
-            <div class="toggle"><input id="auto" type="checkbox"> <label for="auto">Auto-start next session</label></div>
+            <div class="toggle"><input id="auto" type="checkbox"> <label id="lbl-auto" for="auto">${t('toggle')}</label></div>
           </div>
         `;
 
@@ -137,6 +181,8 @@
           controls: $('#controls'),
           start: $('#start'), pause: $('#pause'), reset: $('#reset'),
           work: $('#work'), short: $('#short'), long: $('#long'),
+          lblWork: $('#lbl-work'), lblShort: $('#lbl-short'), lblLong: $('#lbl-long'),
+          lblAuto: $('#lbl-auto'),
           auto: $('#auto')
         };
 
@@ -182,18 +228,42 @@
       start(){ if(this._running) return; this._running = true; this._start = performance.now(); this._tick(); this._emit('state',{running:true, mode:this._mode}); }
       pause(){ if(!this._running) return; this._running = false; cancelAnimationFrame(this._raf); this._elapsedBeforePause += performance.now() - this._start; this._emit('state',{running:false, mode:this._mode}); }
       reset(){ this._running = false; cancelAnimationFrame(this._raf); this._elapsedBeforePause = 0; this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); this._emit('state',{running:false, mode:this._mode}); }
-      setMode(mode){ mode = String(mode||'work').toLowerCase(); if(!['work','short','long'].includes(mode)) return;
+      setMode(mode){
+        mode = String(mode||'work').toLowerCase();
+        if(!['work','short','long'].includes(mode)) return;
         const wasRunning = this._running; this.pause(); this._mode = mode; this._elapsedBeforePause = 0; this._applyModeUI();
-        this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); if(wasRunning) this.start(); this._emit('mode',{mode}); }
-      setDurations({work, short, long}){ const mins = {
-        work: Math.max(1, Math.floor(work ?? (this._durations.work/60))),
-        short: Math.max(1, Math.floor(short ?? (this._durations.short/60))),
-        long: Math.max(1, Math.floor(long ?? (this._durations.long/60)))
-      };
-        this._durations = { work: mins.work*60, short: mins.short*60, long: mins.long*60 }; this._saveSettings(); this.reset();
-        this._dom.work.value = mins.work; this._dom.short.value = mins.short; this._dom.long.value = mins.long; }
+        this._updateTimeLabel(this._durations[this._mode]*1000); this._drawProgress(0); if(wasRunning) this.start(); this._emit('mode',{mode});
+      }
+      setDurations({work, short, long}){
+        const mins = { work: Math.max(1, Math.floor(work ?? (this._durations.work/60))),
+                       short: Math.max(1, Math.floor(short ?? (this._durations.short/60))),
+                       long: Math.max(1, Math.floor(long ?? (this._durations.long/60))) };
+        this._durations = { work: mins.work*60, short: mins.short*60, long: mins.long*60 };
+        this._saveSettings(); this.reset();
+        this._dom.work.value = mins.work; this._dom.short.value = mins.short; this._dom.long.value = mins.long;
+      }
       setAutoStart(v){ this._autoStart = !!v; this._dom.auto.checked = !!v; this._saveSettings(); }
       toggleAutoStart(){ this.setAutoStart(!this._autoStart); }
+
+      setLanguage(lang){
+        this._lang = (DICT[lang] ? lang : 'en');
+        const t = (k)=> (DICT[this._lang]||DICT.en)[k] || k;
+        // Tabs
+        this._dom.tabs[0].textContent = t('work');
+        this._dom.tabs[1].textContent = t('short');
+        this._dom.tabs[2].textContent = t('long');
+        // Mode label
+        this._dom.mode.textContent = (this._mode==='work')?t('label_work'):(this._mode==='short'?t('label_short'):t('label_long'));
+        // Buttons
+        this._dom.start.textContent = t('start');
+        this._dom.pause.textContent = t('pause');
+        this._dom.reset.textContent = t('reset');
+        // Settings labels
+        this._dom.lblWork.textContent  = t('set_work');
+        this._dom.lblShort.textContent = t('set_short');
+        this._dom.lblLong.textContent  = t('set_long');
+        this._dom.lblAuto.textContent  = t('toggle');
+      }
 
       _tick(){
         if(!this._running) return;
@@ -212,20 +282,21 @@
           this._running = false; cancelAnimationFrame(this._raf);
           this._elapsedBeforePause = 0;
           this._emit('complete',{mode:this._mode});
-
           if(this._mode === 'work'){
             this._cycleCount = (this._cycleCount + 1) % 4;
             this.setMode(this._cycleCount === 0 ? 'long' : 'short');
           } else {
             this.setMode('work');
           }
+          // keep language labels consistent after auto-switch
+          this.setLanguage(this._lang);
           if(this._autoStart) this.start();
         }
       }
 
       _applyModeUI(){
-        const label = this._mode === 'work' ? 'Work' : (this._mode === 'short' ? 'Short Break' : 'Long Break');
-        this._dom.mode.textContent = label;
+        const t = (k)=> (DICT[this._lang]||DICT.en)[k] || k;
+        this._dom.mode.textContent = (this._mode==='work')?t('label_work'):(this._mode==='short'?t('label_short'):t('label_long'));
         const root = this._shadow.host;
         if(this._mode==='work'){ root.style.setProperty('--primary','#6366f1'); root.style.setProperty('--accent','#22d3ee'); }
         if(this._mode==='short'){ root.style.setProperty('--primary','#10b981'); root.style.setProperty('--accent','#34d399'); }
@@ -275,6 +346,55 @@
       };
     }
   })();
+
+  // === Language wiring for page & component ===
+  const btnHe = document.getElementById('btn-he');
+  const btnEn = document.getElementById('btn-en');
+  const h2Component = document.getElementById('h2-component');
+  const h2Controls  = document.getElementById('h2-controls');
+  const tipEl       = document.getElementById('tip');
+  const ext = {
+    start: document.getElementById('btn-start'),
+    pause: document.getElementById('btn-pause'),
+    reset: document.getElementById('btn-reset'),
+    work:  document.getElementById('btn-work'),
+    short: document.getElementById('btn-short'),
+    long:  document.getElementById('btn-long'),
+    toggle:document.getElementById('btn-toggle'),
+  };
+
+  function applyLangToPage(lang){
+    const t = (k)=> (DICT[lang]||DICT.en)[k] || k;
+    h2Component.textContent = t('page_component');
+    h2Controls.textContent  = t('page_controls');
+    tipEl.innerHTML = t('tip');
+    ext.start.textContent = t('start');
+    ext.pause.textContent = t('pause');
+    ext.reset.textContent = t('reset');
+    ext.work.textContent  = t('work');
+    ext.short.textContent = t('short');
+    ext.long.textContent  = t('long');
+    ext.toggle.textContent= t('toggle');
+
+    // עדכון מצב כפתורים ושמירה
+    btnHe.classList.toggle('active', lang==='he');
+    btnEn.classList.toggle('active', lang==='en');
+    localStorage.setItem(LANG_KEY, lang);
+
+    // עדכון הקומפוננטה (בתוך Shadow DOM)
+    const comp = document.getElementById('pom1');
+    if (comp && typeof comp.setLanguage === 'function') comp.setLanguage(lang);
+
+    // אירוע כללי (אם תוסיף עוד חלקים בעתיד)
+    window.dispatchEvent(new CustomEvent('lang:change', {detail:{lang}}));
+  }
+
+  // init from storage (default he)
+  const initialLang = localStorage.getItem(LANG_KEY) || 'he';
+  applyLangToPage(initialLang);
+
+  btnHe.addEventListener('click', ()=> applyLangToPage('he'));
+  btnEn.addEventListener('click', ()=> applyLangToPage('en'));
   </script>
 </body>
 </html>
