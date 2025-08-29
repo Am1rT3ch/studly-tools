@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Studly Pro — מחשבון תואר</title>
   <link rel="icon" href="./assets/logo.png" type="image/png">
+
+  <!-- PWA (שלב 3) -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b1020">
+
   <style>
     :root{ --bg:#0b1020; --fg:#e6e8ee; --muted:#9aa6c1; --card:rgba(255,255,255,.06); --b:rgba(255,255,255,.1); --accent:#6366f1; --accent2:#22d3ee; }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial }
     .wrap{ max-width:1100px; margin:0 auto; padding:24px }
-
-    /* Header: לוגו מימין, ניווט באמצע, שפה משמאל */
     header{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; margin-bottom:24px }
     .brand{ justify-self:start; display:flex; align-items:center; gap:10px }
     .brand img{ width:40px; height:40px; border-radius:8px }
@@ -21,8 +24,6 @@
     .lang{ justify-self:end; display:flex; gap:8px }
     .lang .btn{ appearance:none; border:0; padding:8px 12px; border-radius:12px; font-weight:700; cursor:pointer; background:#1b2238; color:var(--fg); border:1px solid var(--b) }
     .lang .btn.active{ outline:2px solid var(--accent) }
-
-    /* Cards & grid */
     .grid{ display:grid; gap:24px; grid-template-columns:1fr; }
     @media (min-width: 900px) { .grid { grid-template-columns: 2fr 1fr; } }
     .card{ background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
@@ -30,25 +31,19 @@
            padding: 20px; border: 1px solid rgba(255,255,255,.08); }
     .card h2{ margin:0 0 12px; font-size:18px; font-weight:600; letter-spacing:.3px }
     .muted{ opacity:.75; font-size:12px }
-
     .row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
     .btn{ appearance:none; border:0; padding:10px 14px; border-radius:12px; font-weight:700; cursor:pointer; background:#2a2f45; color:#e6e8ee; transition:transform .08s, box-shadow .2s; box-shadow:0 6px 16px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06) }
     .btn:hover{ transform:translateY(-1px) }
     .btn:active{ transform:translateY(0) }
     .btn.primary{ background: linear-gradient(135deg, var(--accent), var(--accent2)); color:#081018 }
     .btn.ghost{ background:#1b2238 }
-
-    /* Table-like list */
     .table{ display:grid; grid-template-columns: 1fr 120px 120px 80px; gap:8px; align-items:center; }
     .th, .td{ background:#0f162d; border:1px solid var(--b); border-radius:12px; padding:10px 12px; }
     .th{ background:#12182c; color:var(--muted); font-weight:700; }
     .td input{ width:100%; background:transparent; border:none; color:var(--fg); font-weight:700; outline:none }
     .td.actions{ display:flex; gap:8px; justify-content:center; background:transparent; border:none; }
-
-    .result{
-      display:grid; gap:10px; place-items:center; text-align:center; padding:16px; border-radius:16px;
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border:1px solid var(--b)
-    }
+    .result{ display:grid; gap:10px; place-items:center; text-align:center; padding:16px; border-radius:16px;
+             background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border:1px solid var(--b) }
     .score{ font-size:44px; font-weight:900; letter-spacing:.5px }
     .details{ color:var(--muted); font-size:13px; text-align: start; }
     footer{ margin-top:28px; color:var(--muted); font-size:13px; text-align:center }
@@ -56,7 +51,6 @@
 </head>
 <body>
   <div class="wrap">
-    <!-- Header -->
     <header>
       <div class="brand">
         <img src="./assets/logo.png" alt="Studly Pro"><span id="t-brand">Studly Pro</span>
@@ -76,23 +70,18 @@
     </header>
 
     <div class="grid">
-      <!-- מחשבון -->
       <div class="card">
         <h2 id="h2-title">מחשבון תואר כולל</h2>
         <p class="muted" id="hint">הוסף קורסים, הזן ציון ונקודות זכות. החישוב הוא ממוצע משוקלל לפי נקודות הזכות.</p>
 
-        <!-- כותרות -->
         <div class="table" style="margin-top:10px">
           <div class="th" id="th-course">קורס</div>
           <div class="th" id="th-grade">ציון</div>
           <div class="th" id="th-credits">נק&quot;ז</div>
           <div class="th" id="th-actions">פעולות</div>
         </div>
-
-        <!-- שורות -->
         <div id="rows"></div>
 
-        <!-- פעולות כלליות -->
         <div class="row" style="margin-top:10px">
           <button class="btn primary" id="btn-add">+ הוסף קורס</button>
           <button class="btn ghost" id="btn-calc">חשב</button>
@@ -100,14 +89,12 @@
           <button class="btn" id="btn-demo">מלא דוגמה</button>
         </div>
 
-        <!-- תוצאה -->
         <div class="result" style="margin-top:16px">
           <div class="score" id="score">—</div>
           <div class="details" id="details">הזן נתונים לחישוב.</div>
         </div>
       </div>
 
-      <!-- הסבר -->
       <div class="card">
         <h2 id="h2-explain">איך זה עובד?</h2>
         <p class="muted" id="explain">
@@ -122,7 +109,6 @@
   </div>
 
   <script>
-    /* ====== מילון שפות ====== */
     const DICT = {
       he: {
         brand:"Studly Pro",
@@ -156,8 +142,6 @@
       }
     };
     const LANG_KEY = 'studlypro:lang';
-
-    /* ====== Header wiring ====== */
     const elsHeader = {
       brand: document.getElementById('t-brand'),
       nav_home: document.getElementById('t-nav-home'),
@@ -170,8 +154,6 @@
       btnHe: document.getElementById('btn-he'),
       btnEn: document.getElementById('btn-en'),
     };
-
-    /* ====== Rows ====== */
     const rowsHost = document.getElementById('rows');
     const btnAdd   = document.getElementById('btn-add');
     const btnCalc  = document.getElementById('btn-calc');
@@ -179,7 +161,6 @@
     const btnDemo  = document.getElementById('btn-demo');
     const scoreOut = document.getElementById('score');
     const details  = document.getElementById('details');
-
     const h2Title  = document.getElementById('h2-title');
     const hint     = document.getElementById('hint');
     const thCourse = document.getElementById('th-course');
@@ -190,25 +171,20 @@
     const explain  = document.getElementById('explain');
 
     let rowCount = 0;
-
     function makeRow(name='', grade='', credits=''){
       rowCount += 1;
       const lang = localStorage.getItem(LANG_KEY) || 'he';
       const d = DICT[lang] || DICT.he;
-
       const row = document.createElement('div');
       row.className = 'table';
       row.innerHTML = `
         <div class="td"><input type="text" class="in-name" placeholder="${d.placeholder_course(rowCount)}" value="${name}"></div>
         <div class="td"><input type="number" class="in-grade" min="0" max="100" step="0.01" placeholder="100" value="${grade}"></div>
         <div class="td"><input type="number" class="in-cred"  min="0" step="0.5" placeholder="5" value="${credits}"></div>
-        <div class="td actions">
-          <button class="btn ghost btn-remove">${d.remove}</button>
-        </div>
+        <div class="td actions"><button class="btn ghost btn-remove">${d.remove}</button></div>
       `;
       row.querySelector('.btn-remove').addEventListener('click', ()=>{
         rowsHost.removeChild(row);
-        // לא נותנים לרדת מתחת ל־1 שורה — אם הכל נמחק, נוסיף ריק
         if (rowsHost.children.length === 0) addN(1);
       });
       rowsHost.appendChild(row);
@@ -218,62 +194,37 @@
     function calc(){
       const lang = localStorage.getItem(LANG_KEY) || 'he';
       const d = DICT[lang] || DICT.he;
-
-      let sumWeighted = 0;
-      let sumCredits = 0;
-      const rows = [...rowsHost.children];
-      rows.forEach(r=>{
+      let sumWeighted = 0, sumCredits = 0;
+      [...rowsHost.children].forEach(r=>{
         const g = parseFloat(r.querySelector('.in-grade').value || '0');
         const c = parseFloat(r.querySelector('.in-cred').value || '0');
-        if (!isFinite(g) || !isFinite(c)) return;
-        if (c <= 0) return;
-        sumWeighted += (g * c);
-        sumCredits  += c;
+        if (!isFinite(g) || !isFinite(c) || c<=0) return;
+        sumWeighted += g*c; sumCredits += c;
       });
-
-      if (sumCredits <= 0){
-        scoreOut.textContent = '—';
-        details.textContent = d.score_empty;
-        return;
-      }
-      const avg = Math.round((sumWeighted / sumCredits) * 100) / 100;
+      if (sumCredits <= 0){ scoreOut.textContent='—'; details.textContent=d.score_empty; return; }
+      const avg = Math.round((sumWeighted/sumCredits)*100)/100;
       scoreOut.textContent = `${avg}%`;
-      details.textContent = d.output(avg, Math.round(sumWeighted*100)/100, Math.round(sumCredits*100)/100);
+      details.textContent = d.output(Math.round(avg*100)/100, Math.round(sumWeighted*100)/100, Math.round(sumCredits*100)/100);
     }
-
     function clearAll(){
-      rowsHost.innerHTML = '';
-      rowCount = 0;
-      addN(3); // שלוש שורות ברירת מחדל
-      scoreOut.textContent = '—';
+      rowsHost.innerHTML=''; rowCount=0; addN(3);
+      scoreOut.textContent='—';
       const lang = localStorage.getItem(LANG_KEY) || 'he';
-      details.textContent = (DICT[lang]||DICT.he).score_empty;
+      details.textContent=(DICT[lang]||DICT.he).score_empty;
     }
-
-    // Demo: שתי דוגמאות פשוטות
     function demo(){
-      rowsHost.innerHTML = '';
-      rowCount = 0;
-      // דוגמה כמו שביקשת: 5 נק"ז בציון 100, ו־5 נק"ז בציון 50 => ממוצע 75
-      makeRow('קורס 1', '100', '5');
-      makeRow('קורס 2', '50', '5');
-      makeRow('', '', '');
+      rowsHost.innerHTML=''; rowCount=0;
+      makeRow('קורס 1','100','5'); makeRow('קורס 2','50','5'); makeRow('','', '');
       calc();
     }
-
-    btnAdd.addEventListener('click', ()=> makeRow());
+    btnAdd.addEventListener('click', ()=>makeRow());
     btnCalc.addEventListener('click', calc);
     btnClear.addEventListener('click', clearAll);
     btnDemo.addEventListener('click', demo);
-
-    // יצירת 3 שורות ראשוניות
     addN(3);
 
-    /* ====== שפה ====== */
     function applyLang(lang){
       const d = DICT[lang] || DICT.he;
-
-      // Header
       elsHeader.brand.textContent = d.brand;
       elsHeader.nav_home.textContent = d.nav_home;
       elsHeader.nav_pomodoro.textContent = d.nav_pomodoro;
@@ -284,36 +235,36 @@
       elsHeader.footer.textContent = d.footer;
       elsHeader.btnHe.classList.toggle('active', lang==='he');
       elsHeader.btnEn.classList.toggle('active', lang==='en');
-
-      // Texts
       h2Title.textContent = d.title;
       hint.textContent = d.hint;
       thCourse.textContent = d.th_course;
       thGrade.textContent  = d.th_grade;
       thCred.textContent   = d.th_credits;
       thActs.textContent   = d.th_actions;
-      document.getElementById('btn-add').textContent  = d.add;
-      document.getElementById('btn-calc').textContent = d.calc;
-      document.getElementById('btn-clear').textContent= d.clear;
+      document.getElementById('btn-add').textContent = d.add;
+      document.getElementById('btn-calc').textContent= d.calc;
+      document.getElementById('btn-clear').textContent=d.clear;
       document.getElementById('btn-demo').textContent = d.demo;
       h2Explain.textContent = d.explain_title;
       explain.innerHTML = d.explain;
-
-      // עדכון פלייסהולדרים קיימים
-      [...rowsHost.children].forEach((r, i)=>{
-        const name = r.querySelector('.in-name');
-        if (!name.value) name.placeholder = d.placeholder_course(i+1);
-        r.querySelector('.btn-remove').textContent = d.remove;
+      [...rowsHost.children].forEach((r,i)=>{
+        const name=r.querySelector('.in-name'); if(!name.value) name.placeholder=d.placeholder_course(i+1);
+        r.querySelector('.btn-remove').textContent=d.remove;
       });
-
       localStorage.setItem(LANG_KEY, lang);
     }
-
-    elsHeader.btnHe.addEventListener('click', ()=> applyLang('he'));
-    elsHeader.btnEn.addEventListener('click', ()=> applyLang('en'));
-
-    // Init language
+    document.getElementById('btn-he').addEventListener('click', ()=> applyLang('he'));
+    document.getElementById('btn-en').addEventListener('click', ()=> applyLang('en'));
     applyLang(localStorage.getItem(LANG_KEY) || 'he');
+  </script>
+
+  <!-- PWA SW register (שלב 4) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/studly-tools/sw.js').catch(console.error);
+      });
+    }
   </script>
 </body>
 </html>
